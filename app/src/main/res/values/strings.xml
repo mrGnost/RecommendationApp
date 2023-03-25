@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">RecommendationApp</string>
+    <string name="filters_title">Фильтры</string>
+    <string name="cancel_sheet">Сбросить</string>
+    <string name="show_places_sheet">Показать места</string>
+    <string name="main_nav_item">Главное</string>
+    <string name="places_nav_item">Места</string>
+    <string name="fav_nav_item">Избранное</string>
+    <string name="profile_nav_item">Профиль</string>
+    <string name="search">Поиск</string>
+    <string name="show_places_short">Показать</string>
+    <string name="filters_btn">Фильтры</string>
+    <string name="recommendations_btn">Рекомендации</string>
+    <string name="work_time">Время работы</string>
+    <string name="more">Ещё</string>
+    <string name="cancel">Отмена</string>
+    <string name="share">Поделиться</string>
+    <string name="to_bookmarks">В закладки</string>
+    <string name="to_bookmarks_descriprion">Добавить в закладки</string>
+    <string name="like">Нравится</string>
+    <string name="address">Адрес</string>
+    <string name="work_hours">Режим работы</string>
+    <string name="contacts">Контакты</string>
+    <string name="vk">VK</string>
+    <string name="instagram">Instagram</string>
+    <string name="recommend_title">Рекомендуем!</string>
+    <string name="recommend_description">Это место есть в списке рекомендованных. Сохраните его, чтобы не забыть</string>
+    <string name="want_to_visit">Хочу сходить</string>
+    <string name="is_open">Сейчас открыто</string>
+    <string name="show_on_map">Смотреть на карте</string>
+    <string name="like_title">Уже бывали тут?</string>
+    <string name="like_description">Добавьте заведение в список любимых мест. Будем рекомендовать похожие</string>
+    <string name="favourite_place">Любимое место</string>
+    <string name="favourite_places">Любимые места</string>
+    <string name="favourite">Избранное</string>
+    <string name="loading_data">Загрузка данных...</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/ic_share_24"
+        android:title="@string/share"
+        android:contentDescription="@string/share"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/mark"
+        android:icon="@drawable/ic_bookmark_border_24"
+        android:title="@string/to_bookmarks"
+        android:contentDescription="@string/to_bookmarks_descriprion"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/like"
+        android:icon="@drawable/ic_favorite_border_24"
+        android:title="@string/like"
+        android:contentDescription="@string/like"
+        app:showAsAction="always" />
+</menu>

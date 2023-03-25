@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="10dp"
+    android:background="@drawable/rounded_orange_holder">
+    <com.google.android.material.chip.Chip
+        android:id="@+id/fav_chip"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/favourite_places"
+        android:textAlignment="center"
+        style="@style/Widget.RecommendationApp.Chip.Checked"
+        android:layout_weight="1" />
+    <com.google.android.material.chip.Chip
+        android:id="@+id/mark_chip"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/want_to_visit"
+        android:textAlignment="center"
+        style="@style/Widget.RecommendationApp.Chip.Unchecked"
+        android:layout_weight="1" />
+</LinearLayout>
