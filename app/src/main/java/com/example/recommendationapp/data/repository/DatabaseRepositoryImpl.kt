@@ -109,4 +109,16 @@ class DatabaseRepositoryImpl
             })
         }
     }
+
+    override fun changeFavourite(id: Int, favourite: Boolean): Completable {
+        return Completable.fromRunnable {
+            restaurantsDao.changeFavouriteById(id, if (favourite) 1 else 0)
+        }
+    }
+
+    override fun changeMark(id: Int, marked: Boolean): Completable {
+        return Completable.fromRunnable {
+            restaurantsDao.changeMarkById(id, if (marked) 1 else 0)
+        }
+    }
 }

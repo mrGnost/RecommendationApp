@@ -1,5 +1,6 @@
 package com.example.recommendationapp.presentation.favourite.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,6 +17,7 @@ import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.favourite.adapter.FavouriteAdapter
 import com.example.recommendationapp.presentation.favourite.viewmodel.FavouriteViewModel
 import com.example.recommendationapp.presentation.favourite.viewmodel.FavouriteViewModelFactory
+import com.example.recommendationapp.presentation.restaurant.view.RestaurantActivity
 import com.example.recommendationapp.presentation.splash.view.SplashActivity
 import com.example.recommendationapp.utils.callback.RestaurantClickListener
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
@@ -41,7 +43,12 @@ class FavouriteFragment : Fragment() {
 
     private var holderClickListener = object : RestaurantClickListener {
         override fun onClick(restaurantShort: RestaurantShort) {
-
+            startActivity(
+                Intent(activity, RestaurantActivity::class.java)
+                    .putExtra("restaurant_id", restaurantShort.id)
+                    .putExtra("is_favourite", restaurantShort.favourite)
+                    .putExtra("is_marked", restaurantShort.marked)
+            )
         }
     }
 

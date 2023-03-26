@@ -5,6 +5,7 @@ import androidx.room.*
 import com.example.recommendationapp.data.model.FilterDataEntity
 import com.example.recommendationapp.data.model.RestaurantDataEntity
 import com.example.recommendationapp.data.model.RestaurantShortDataEntity
+import io.reactivex.Completable
 
 @Dao
 interface RestaurantsDao {
@@ -56,4 +57,12 @@ interface RestaurantsDao {
 
     @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.FILTERS_TABLE_NAME}")
     fun getFilters(): LiveData<List<FilterDataEntity>>
+
+    @Query("UPDATE ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
+            "SET favourite = :favourite WHERE id = :id")
+    fun changeFavouriteById(id: Int, favourite: Int)
+
+    @Query("UPDATE ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
+            "SET marked = :marked WHERE id = :id")
+    fun changeMarkById(id: Int, marked: Int)
 }

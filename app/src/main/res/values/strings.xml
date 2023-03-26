@@ -34,4 +34,5 @@
     <string name="favourite_places">Любимые места</string>
     <string name="favourite">Избранное</string>
     <string name="loading_data">Загрузка данных...</string>
+    <string name="tags_and_compilations">Теги и подборки</string>
 </resources>

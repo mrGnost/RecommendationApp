@@ -1,5 +1,6 @@
 package com.example.recommendationapp.presentation.search.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -15,6 +16,7 @@ import com.example.recommendationapp.databinding.FragmentSearchBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.RestaurantShort
+import com.example.recommendationapp.presentation.restaurant.view.RestaurantActivity
 import com.example.recommendationapp.presentation.search.adapter.SearchAdapter
 import com.example.recommendationapp.presentation.search.viewmodel.SearchViewModel
 import com.example.recommendationapp.presentation.search.viewmodel.SearchViewModelFactory
@@ -45,7 +47,12 @@ class SearchActivity : AppCompatActivity() {
 
     private var holderClickListener = object : RestaurantClickListener {
         override fun onClick(restaurantShort: RestaurantShort) {
-
+            startActivity(
+                Intent(this@SearchActivity, RestaurantActivity::class.java)
+                    .putExtra("restaurant_id", restaurantShort.id)
+                    .putExtra("is_favourite", restaurantShort.favourite)
+                    .putExtra("is_marked", restaurantShort.marked)
+            )
         }
     }
 

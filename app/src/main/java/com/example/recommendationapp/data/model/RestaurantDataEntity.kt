@@ -20,19 +20,24 @@ data class RestaurantDataEntity(
     @SerializedName("id") var id: Int,
     @SerializedName("name") var name: String,
     @SerializedName("photo") var photo: Int,
+    @SerializedName("dishPhotos") var dishPhotos: List<Int>,
     @SerializedName("description") var description: String,
     @SerializedName("workingHours") var workingHours: String,
+    @SerializedName("address") var address: String,
     @SerializedName("contactPhoneNumbers") var contactPhoneNumbers: String,
     @SerializedName("location") var location: LocationDataEntity,
     @SerializedName("rating") var rating: Double,
-    @SerializedName("priceCategory") var priceCategory: String,
     @SerializedName("categories") var categories: String,
-    @SerializedName("socials") var socials: List<SocialDataEntity>?
+    @SerializedName("tags") var tags: String,
+    @SerializedName("socials") var socials: List<SocialDataEntity>,
+    @SerializedName("chainCafes") var chainCafes: List<RestaurantShortDataEntity>
 ) : Parcelable {
     constructor() : this(
         0,
         "",
         0,
+        listOf(),
+        "",
         "",
         "",
         "",
@@ -40,19 +45,22 @@ data class RestaurantDataEntity(
         .0,
         "",
         "",
-        null
+        listOf(),
+        listOf()
     )
 
     fun toEntity() = Restaurant(
-        id, name, photo, description, workingHours, contactPhoneNumbers,
-        location.toEntity(), rating, priceCategory,
-        categories, socials?.map { it.toEntity() })
+        id, name, photo, dishPhotos, description, workingHours,
+        address, contactPhoneNumbers, location.toEntity(), rating,
+        categories, tags, socials.map { it.toEntity() }, chainCafes.map { it.toEntity() })
 
     companion object {
         fun fromEntity(entity: Restaurant) = with(entity) {
-            RestaurantDataEntity(id, name, photo, description, workingHours, contactPhoneNumbers,
-                LocationDataEntity.fromEntity(location), rating, priceCategory,
-                categories, socials?.map { SocialDataEntity.fromEntity(it) })
+            RestaurantDataEntity(
+                id, name, photo, dishPhotos, description, workingHours,
+                address, contactPhoneNumbers, LocationDataEntity.fromEntity(location), rating,
+                categories, tags, socials.map { SocialDataEntity.fromEntity(it) },
+                chainCafes.map { RestaurantShortDataEntity.fromEntity(it) })
         }
     }
 }

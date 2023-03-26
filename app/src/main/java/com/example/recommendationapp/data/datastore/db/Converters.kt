@@ -2,6 +2,7 @@ package com.example.recommendationapp.data.datastore.db
 
 import androidx.room.TypeConverter
 import com.example.recommendationapp.data.model.LocationDataEntity
+import com.example.recommendationapp.data.model.RestaurantShortDataEntity
 import com.example.recommendationapp.data.model.SocialDataEntity
 import com.google.gson.Gson
 
@@ -31,4 +32,17 @@ object Converters {
 
     @TypeConverter
     fun jsonToBools(value: String) = gson.fromJson(value, Array<Boolean>::class.java).toMutableList()
+
+    @TypeConverter
+    fun intsToJson(value: List<Int>) = gson.toJson(value)
+
+    @TypeConverter
+    fun jsonToInts(value: String) = gson.fromJson(value, Array<Int>::class.java).toMutableList()
+
+    @TypeConverter
+    fun restaurantsToJson(value: List<RestaurantShortDataEntity>) = gson.toJson(value)
+
+    @TypeConverter
+    fun jsonToRestaurants(value: String) =
+        gson.fromJson(value, Array<RestaurantShortDataEntity>::class.java).toMutableList()
 }

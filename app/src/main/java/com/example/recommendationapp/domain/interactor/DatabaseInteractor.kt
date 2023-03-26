@@ -48,4 +48,10 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
 
     fun setFilterChecked(filter: Filter, checked: Boolean, filterId: Int) =
         databaseRepository.changeCheckedFilter(filter, checked, filterId)
+
+    fun changeFavourite(id: Int, favourite: Boolean) =
+        databaseRepository.changeFavourite(id, favourite)
+
+    fun changeMarked(id: Int, marked: Boolean) =
+        databaseRepository.changeMark(id, marked)
 }

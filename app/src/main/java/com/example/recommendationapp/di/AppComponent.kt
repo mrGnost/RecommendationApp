@@ -16,7 +16,6 @@ import javax.inject.Singleton
 @Component(
     modules = [
         RetrofitModule::class,
-        MapKitModule::class,
         RoomModule::class,
         BindModule::class
     ]

@@ -8,12 +8,15 @@ data class Restaurant(
     val id: Int,
     val name: String,
     val photo: Int,
+    val dishPhotos: List<Int>,
     val description: String,
     val workingHours: String,
+    val address: String,
     val contactPhoneNumbers: String,
     val location: Location,
     val rating: Double,
-    val priceCategory: String,
     val categories: String,
-    val socials: List<Social>?
+    val tags: String,
+    val socials: List<Social>,
+    val chainCafes: List<RestaurantShort>
 ) : Parcelable

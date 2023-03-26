@@ -1,6 +1,7 @@
 package com.example.recommendationapp.domain.interactor
 
 import com.example.recommendationapp.domain.model.Filter
+import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.domain.repository.RecommendationRepository
 import io.reactivex.Single
@@ -10,6 +11,10 @@ class RecommendationInteractor
 @Inject constructor(private val recommendationRepository: RecommendationRepository) {
     fun getAllRestaurants(): Single<List<RestaurantShort>> {
         return recommendationRepository.getAllRestaurants()
+    }
+
+    fun getRestaurant(id: Int): Single<Restaurant> {
+        return recommendationRepository.getRestaurant(id)
     }
 
     fun getFilters(): Single<List<Filter>> {
