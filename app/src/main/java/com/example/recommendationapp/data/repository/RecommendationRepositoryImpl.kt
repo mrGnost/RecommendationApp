@@ -19,8 +19,8 @@ class RecommendationRepositoryImpl
         return api.getRestaurantInfo(placeId).map { it.toEntity() }
     }
 
-    override fun getFilters(): Single<Filter> {
-        return api.getFilters().map { it.toEntity() }
+    override fun getFilters(): Single<List<Filter>> {
+        return api.getFilters().map { x -> x.map{ it.toEntity() } }
     }
 
     override fun getRecommended(userId: Int): Single<List<RestaurantShort>> {

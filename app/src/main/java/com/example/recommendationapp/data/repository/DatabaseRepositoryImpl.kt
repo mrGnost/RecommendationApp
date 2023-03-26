@@ -3,8 +3,10 @@ package com.example.recommendationapp.data.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.example.recommendationapp.data.datastore.db.RestaurantsDao
+import com.example.recommendationapp.data.model.FilterDataEntity
 import com.example.recommendationapp.data.model.RestaurantDataEntity
 import com.example.recommendationapp.data.model.RestaurantShortDataEntity
+import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.domain.repository.DatabaseRepository
@@ -87,6 +89,24 @@ class DatabaseRepositoryImpl
     override fun findRestaurants(prefix: String): Single<List<RestaurantShort>> {
         return Single.fromCallable {
             restaurantsDao.findRestaurants(prefix).map { it.toEntity() }
+        }
+    }
+
+    override fun putFilters(filters: List<Filter>): Completable {
+        return Completable.fromRunnable {
+            restaurantsDao.putFilters(filters.map { FilterDataEntity.fromEntity(it) })
+        }
+    }
+
+    override fun getFilters(): LiveData<List<Filter>> {
+        return restaurantsDao.getFilters().map { x -> x.map { it.toEntity() } }
+    }
+
+    override fun changeCheckedFilter(filter: Filter, value: Boolean, filterId: Int): Completable {
+        return Completable.fromRunnable {
+            restaurantsDao.updateFilter(FilterDataEntity.fromEntity(filter).apply {
+                checked[filterId] = value
+            })
         }
     }
 }

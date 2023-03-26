@@ -12,7 +12,7 @@ class RecommendationInteractor
         return recommendationRepository.getAllRestaurants()
     }
 
-    fun getFilters(): Single<Filter> {
+    fun getFilters(): Single<List<Filter>> {
         return recommendationRepository.getFilters()
     }
 

@@ -2,6 +2,7 @@ package com.example.recommendationapp.data.datastore.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import com.example.recommendationapp.data.model.FilterDataEntity
 import com.example.recommendationapp.data.model.RestaurantDataEntity
 import com.example.recommendationapp.data.model.RestaurantShortDataEntity
 
@@ -13,11 +14,17 @@ interface RestaurantsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun putRestaurants(restaurants: List<RestaurantDataEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun putFilters(filters: List<FilterDataEntity>)
+
     @Update
     fun updateRestaurantsShort(restaurants: List<RestaurantShortDataEntity>)
 
     @Update
     fun updateRestaurantShort(restaurants: RestaurantShortDataEntity)
+
+    @Update
+    fun updateFilter(filter: FilterDataEntity)
 
     @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
             "WHERE (latitude BETWEEN :leftLat AND :rightLat) " +
@@ -46,4 +53,7 @@ interface RestaurantsDao {
     @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
             "WHERE name LIKE :prefix || '%'")
     fun findRestaurants(prefix: String): List<RestaurantShortDataEntity>
+
+    @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.FILTERS_TABLE_NAME}")
+    fun getFilters(): LiveData<List<FilterDataEntity>>
 }

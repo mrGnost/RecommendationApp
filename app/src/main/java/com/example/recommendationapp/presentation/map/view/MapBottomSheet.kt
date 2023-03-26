@@ -2,19 +2,51 @@ package com.example.recommendationapp.presentation.map.view
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.BottomSheetMapBinding
+import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Filter
+import com.example.recommendationapp.presentation.map.adapter.FiltersAdapter
+import com.example.recommendationapp.presentation.map.viewmodel.MapViewModel
+import com.example.recommendationapp.presentation.map.viewmodel.MapViewModelFactory
+import com.example.recommendationapp.presentation.search.adapter.SearchAdapter
+import com.example.recommendationapp.presentation.splash.view.SplashActivity
+import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
+import io.reactivex.disposables.CompositeDisposable
+import javax.inject.Inject
 
 class MapBottomSheet : BottomSheetDialogFragment() {
+    private lateinit var viewModel: MapViewModel
+    private lateinit var adapter: FiltersAdapter
     lateinit var binding: BottomSheetMapBinding
     lateinit var behavior: BottomSheetBehavior<FrameLayout>
+    private val disposables = CompositeDisposable()
+
+    @Inject
+    lateinit var recommendationInteractor: RecommendationInteractor
+    @Inject
+    lateinit var databaseInteractor: DatabaseInteractor
+    @Inject
+    lateinit var schedulers: SchedulerProvider
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        (activity?.applicationContext as App).appComp().inject(this)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,6 +59,9 @@ class MapBottomSheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        createViewModel()
+        observeLiveData()
+        createAdapter()
         binding.closeBtn.setOnClickListener {
             behavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
@@ -37,6 +72,38 @@ class MapBottomSheet : BottomSheetDialogFragment() {
         behavior = (dialog as BottomSheetDialog).behavior
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
         return dialog
+    }
+
+    private fun createViewModel() {
+        viewModel = ViewModelProvider(
+            this, MapViewModelFactory(recommendationInteractor, databaseInteractor, schedulers)
+        )[MapViewModel::class.java]
+    }
+
+    private fun observeLiveData() {
+        viewModel.getFiltersLiveData().observe(viewLifecycleOwner, this::setFilters)
+        viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
+    }
+
+    private fun setFilters(filters: List<Filter>) {
+        adapter.setData(filters)
+    }
+
+    private fun showError(throwable: Throwable) {
+        Log.d(SplashActivity.TAG, "showError() called with: throwable = $throwable")
+        Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+    }
+
+    private fun createAdapter() {
+        adapter = FiltersAdapter(emptyList())
+        binding.recycler.layoutManager = LinearLayoutManager(context)
+        binding.recycler.adapter = adapter
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposables.dispose()
+        disposables.clear()
     }
 
     companion object {

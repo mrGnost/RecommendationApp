@@ -1,6 +1,7 @@
 package com.example.recommendationapp.domain.interactor
 
 import androidx.lifecycle.LiveData
+import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.domain.repository.DatabaseRepository
@@ -39,4 +40,12 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
 
     fun findRestaurants(prefix: String) =
         databaseRepository.findRestaurants(prefix)
+
+    fun putFilters(filters: List<Filter>) =
+        databaseRepository.putFilters(filters)
+
+    fun getFilters() = databaseRepository.getFilters()
+
+    fun setFilterChecked(filter: Filter, checked: Boolean, filterId: Int) =
+        databaseRepository.changeCheckedFilter(filter, checked, filterId)
 }

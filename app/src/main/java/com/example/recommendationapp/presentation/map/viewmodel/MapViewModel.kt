@@ -1,10 +1,12 @@
 package com.example.recommendationapp.presentation.map.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.yandex.mapkit.map.VisibleRegion
@@ -42,6 +44,21 @@ class MapViewModel(
         )
     }
 
+    fun setFilterChecked(filter: Filter, checked: Boolean, filterId: Int) {
+        disposables.add(databaseInteractor.setFilterChecked(filter, checked, filterId)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(
+                { Log.d(DB, "filter ${filter.variants[filterId]} is now $checked") },
+                errorLiveData::setValue
+            )
+        )
+    }
+
     fun getErrorLiveData(): LiveData<Throwable> {
         return errorLiveData
     }
@@ -52,6 +69,10 @@ class MapViewModel(
 
     fun getRestaurantsLiveData(): LiveData<List<RestaurantShort>> {
         return restaurantsLiveData
+    }
+
+    fun getFiltersLiveData(): LiveData<List<Filter>> {
+        return databaseInteractor.getFilters()
     }
 
     companion object {

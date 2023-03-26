@@ -19,4 +19,16 @@ object Converters {
 
     @TypeConverter
     fun jsonToLocation(value: String) = gson.fromJson(value, LocationDataEntity::class.java)
+
+    @TypeConverter
+    fun stringsToJson(value: List<String>) = gson.toJson(value)
+
+    @TypeConverter
+    fun jsonToStrings(value: String) = gson.fromJson(value, Array<String>::class.java).toMutableList()
+
+    @TypeConverter
+    fun boolsToJson(value: List<Boolean>) = gson.toJson(value)
+
+    @TypeConverter
+    fun jsonToBools(value: String) = gson.fromJson(value, Array<Boolean>::class.java).toMutableList()
 }

@@ -1,6 +1,7 @@
 package com.example.recommendationapp.domain.repository
 
 import androidx.lifecycle.LiveData
+import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
 import io.reactivex.Completable
@@ -30,4 +31,10 @@ interface DatabaseRepository {
     fun getRestaurants(favourite: Boolean): LiveData<List<RestaurantShort>>
 
     fun findRestaurants(prefix: String): Single<List<RestaurantShort>>
+
+    fun putFilters(filters: List<Filter>): Completable
+
+    fun getFilters(): LiveData<List<Filter>>
+
+    fun changeCheckedFilter(filter: Filter, value: Boolean, filterId: Int): Completable
 }

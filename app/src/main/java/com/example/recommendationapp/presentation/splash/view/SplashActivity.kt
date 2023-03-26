@@ -55,6 +55,7 @@ class SplashActivity : AppCompatActivity() {
         viewModel.getErrorLiveData().observe(this, this::showError)
         viewModel.getRecommendationsCompleteLiveData().observe(this, this::recommendedSet)
         viewModel.getFavouritesCompleteLiveData().observe(this, this::favouriteSet)
+        viewModel.getFiltersCompleteLiveData().observe(this, this::filtersSet)
     }
 
     private fun showProgress(isVisible: Boolean) {
@@ -76,6 +77,12 @@ class SplashActivity : AppCompatActivity() {
 
     private fun favouriteSet(isComplete: Boolean) {
         Log.d(TAG_ADD, "favourite loaded: $isComplete")
+        if (isComplete)
+            viewModel.getFilters()
+    }
+
+    private fun filtersSet(isComplete: Boolean) {
+        Log.d(TAG_ADD, "filters loaded: $isComplete")
         if (isComplete) {
             startActivity(Intent(this, LauncherActivity::class.java))
             finish()

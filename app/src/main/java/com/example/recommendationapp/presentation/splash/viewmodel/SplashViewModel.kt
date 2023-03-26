@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.AllRestaurantsResponse
+import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import io.reactivex.disposables.CompositeDisposable
@@ -22,6 +23,7 @@ class SplashViewModel(
     private val completeLiveData = MutableLiveData<Boolean>()
     private val recommendationsCompleteLiveData = MutableLiveData<Boolean>()
     private val favouritesCompleteLiveData = MutableLiveData<Boolean>()
+    private val filtersCompleteLiveData = MutableLiveData<Boolean>()
     private val disposables = CompositeDisposable()
 
     fun cacheAllRestaurants() {
@@ -96,6 +98,30 @@ class SplashViewModel(
         )
     }
 
+    fun getFilters() {
+        disposables.add(recommendationInteractor.getFilters()
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(this::putFiltersToDb, errorLiveData::setValue)
+        )
+    }
+
+    private fun putFiltersToDb(filters: List<Filter>) {
+        disposables.add(databaseInteractor.putFilters(filters)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ filtersCompleteLiveData.postValue(true) }, errorLiveData::setValue)
+        )
+    }
+
     override fun onCleared() {
         super.onCleared()
         disposables.dispose()
@@ -120,6 +146,10 @@ class SplashViewModel(
 
     fun getFavouritesCompleteLiveData(): LiveData<Boolean> {
         return favouritesCompleteLiveData
+    }
+
+    fun getFiltersCompleteLiveData(): LiveData<Boolean> {
+        return filtersCompleteLiveData
     }
 
     companion object {
