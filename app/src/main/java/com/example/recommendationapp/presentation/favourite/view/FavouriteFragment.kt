@@ -73,7 +73,7 @@ class FavouriteFragment : Fragment() {
 
         binding.favSwitch.setOnSwitchChangeListener {
             val favourite = binding.favSwitch.isFavourite
-            adapter.setData(if (favourite) favData else markData)
+            adapter.setData(if (favourite) favData else markData, favourite)
         }
     }
 
@@ -91,7 +91,7 @@ class FavouriteFragment : Fragment() {
 
     private fun updateLikes(restaurants: List<RestaurantShort>) {
         if (binding.favSwitch.isFavourite) {
-            adapter.setData(restaurants)
+            adapter.setData(restaurants, true)
         }
         favData = restaurants
         Log.d("UPDATED_LIKES", "$favData")
@@ -99,7 +99,7 @@ class FavouriteFragment : Fragment() {
 
     private fun updateMarks(restaurants: List<RestaurantShort>) {
         if (!binding.favSwitch.isFavourite) {
-            adapter.setData(restaurants)
+            adapter.setData(restaurants, false)
         }
         markData = restaurants
         Log.d("UPDATED_MARKS", "$markData")

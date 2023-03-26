@@ -20,6 +20,8 @@ class FavouriteAdapter(
     private var holderClickListener: RestaurantClickListener,
     private var markClickListener: RestaurantClickListener
 ) : Adapter<FavouriteViewHolder>() {
+    private var favourite = true
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouriteViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return FavouriteViewHolder(inflater.inflate(R.layout.restaurant_holder, parent, false))
@@ -28,12 +30,13 @@ class FavouriteAdapter(
     override fun getItemCount(): Int = restaurants.size
 
     override fun onBindViewHolder(holder: FavouriteViewHolder, position: Int) {
-        holder.bind(restaurants[position], holderClickListener, markClickListener)
+        holder.bind(restaurants[position], favourite, holderClickListener, markClickListener)
     }
 
-    fun setData(newData: List<RestaurantShort>) {
+    fun setData(newData: List<RestaurantShort>, favourite: Boolean) {
         restaurants = newData
         notifyDataSetChanged()
+        //notifyItemRangeChanged(0, newData.size)
     }
 }
 
@@ -46,13 +49,14 @@ class FavouriteViewHolder(itemView: View) : ViewHolder(itemView) {
 
     fun bind(
         restaurant: RestaurantShort,
+        favourite: Boolean,
         holderClickListener: RestaurantClickListener,
         markClickListener: RestaurantClickListener
     ) {
         placeName.text = restaurant.name
         tags.text = restaurant.categories
         address.text = restaurant.address
-        if (restaurant.favourite) {
+        if (favourite) {
             mark.setImageResource(R.drawable.ic_favorite_24)
         } else {
             mark.setImageResource(R.drawable.ic_bookmark_24)
