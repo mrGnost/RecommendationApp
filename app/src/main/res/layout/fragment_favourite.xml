@@ -13,10 +13,12 @@
         android:textStyle="bold"
         android:textColor="@color/black"/>
     <com.example.recommendationapp.presentation.common.FavouriteSwitch
+        android:id="@+id/fav_switch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="20dp"/>
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>

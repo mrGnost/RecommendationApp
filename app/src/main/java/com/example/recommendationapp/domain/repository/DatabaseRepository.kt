@@ -1,5 +1,6 @@
 package com.example.recommendationapp.domain.repository
 
+import androidx.lifecycle.LiveData
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
 import io.reactivex.Completable
@@ -14,7 +15,9 @@ interface DatabaseRepository {
 
     fun makeFavourite(restaurants: List<RestaurantShort>): Completable
 
-    fun removeMark(restaurant: RestaurantShort): Completable
+    fun setLike(restaurant: RestaurantShort, check: Boolean): Completable
+
+    fun setMark(restaurant: RestaurantShort, check: Boolean): Completable
 
     fun getInArea(
         recommended: Boolean,
@@ -23,4 +26,6 @@ interface DatabaseRepository {
         rightLat: Double,
         rightLon: Double
     ): Single<List<RestaurantShort>>
+
+    fun getRestaurants(favourite: Boolean): LiveData<List<RestaurantShort>>
 }

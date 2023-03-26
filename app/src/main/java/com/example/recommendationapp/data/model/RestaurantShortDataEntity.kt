@@ -23,17 +23,20 @@ data class RestaurantShortDataEntity(
     @SerializedName("latitude") var latitude: Double,
     @SerializedName("longitude") var longitude: Double,
     @SerializedName("categories") var categories: String,
-    @SerializedName("favourite") var favourite: Boolean?
+    @SerializedName("favourite") var favourite: Boolean,
+    @SerializedName("recommended") var recommended: Boolean,
+    @SerializedName("marked") var marked: Boolean
 ) : Parcelable {
-    constructor() : this(0, "", 0, "", .0, .0, "", null)
+    constructor() : this(0, "", 0, "",
+        .0, .0, "", false, false, false)
 
     fun toEntity() = RestaurantShort(id, name, photo, address,
-        Location(latitude, longitude), categories, favourite)
+        Location(latitude, longitude), categories, favourite, recommended, marked)
 
     companion object {
         fun fromEntity(entity: RestaurantShort) = with(entity) {
             RestaurantShortDataEntity(id, name, photo, address,
-                location.latitude, location.longitude, categories, favourite)
+                location.latitude, location.longitude, categories, favourite, recommended, marked)
         }
     }
 }

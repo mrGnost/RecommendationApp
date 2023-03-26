@@ -19,4 +19,8 @@ class RecommendationInteractor
     fun getRecommended(userId: Int): Single<List<RestaurantShort>> {
         return recommendationRepository.getRecommended(userId)
     }
+
+    fun getFavourite(userId: Int): Single<List<RestaurantShort>> {
+        return recommendationRepository.getFavourite(userId)
+    }
 }

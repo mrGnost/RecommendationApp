@@ -1,5 +1,6 @@
 package com.example.recommendationapp.domain.interactor
 
+import androidx.lifecycle.LiveData
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.domain.repository.DatabaseRepository
@@ -16,6 +17,15 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
     fun makeRecommended(restaurants: List<RestaurantShort>) =
         databaseRepository.makeRecommended(restaurants)
 
+    fun makeFavourite(restaurants: List<RestaurantShort>) =
+        databaseRepository.makeFavourite(restaurants)
+
+    fun setLike(restaurant: RestaurantShort, value: Boolean) =
+        databaseRepository.setLike(restaurant, value)
+
+    fun setMark(restaurant: RestaurantShort, value: Boolean) =
+        databaseRepository.setMark(restaurant, value)
+
     fun getRestaurantsInArea(
         recommended: Boolean,
         leftLat: Double,
@@ -24,4 +34,7 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
         rightLon: Double
     ): Single<List<RestaurantShort>> =
         databaseRepository.getInArea(recommended, leftLat, leftLon, rightLat, rightLon)
+
+    fun getRestaurants(favourite: Boolean): LiveData<List<RestaurantShort>> =
+        databaseRepository.getRestaurants(favourite)
 }

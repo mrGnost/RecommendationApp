@@ -1,5 +1,7 @@
 package com.example.recommendationapp.data.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
 import com.example.recommendationapp.data.datastore.db.RestaurantsDao
 import com.example.recommendationapp.data.model.RestaurantDataEntity
 import com.example.recommendationapp.data.model.RestaurantShortDataEntity
@@ -27,7 +29,7 @@ class DatabaseRepositoryImpl
     override fun makeRecommended(restaurants: List<RestaurantShort>): Completable {
         return Completable.fromRunnable {
             restaurantsDao.updateRestaurantsShort(restaurants.map {
-                RestaurantShortDataEntity.fromEntity(it).apply { favourite = false }
+                RestaurantShortDataEntity.fromEntity(it).apply { recommended = true }
             })
         }
     }
@@ -40,10 +42,18 @@ class DatabaseRepositoryImpl
         }
     }
 
-    override fun removeMark(restaurant: RestaurantShort): Completable {
+    override fun setLike(restaurant: RestaurantShort, check: Boolean): Completable {
         return Completable.fromRunnable {
             restaurantsDao.updateRestaurantShort(
-                RestaurantShortDataEntity.fromEntity(restaurant).apply { favourite = null }
+                RestaurantShortDataEntity.fromEntity(restaurant).apply { favourite = check }
+            )
+        }
+    }
+
+    override fun setMark(restaurant: RestaurantShort, check: Boolean): Completable {
+        return Completable.fromRunnable {
+            restaurantsDao.updateRestaurantShort(
+                RestaurantShortDataEntity.fromEntity(restaurant).apply { marked = check }
             )
         }
     }
@@ -66,5 +76,11 @@ class DatabaseRepositoryImpl
                 .getRestaurantsInArea(leftLat, leftLon, rightLat, rightLon)
                 .map { it.toEntity() }
         }
+    }
+
+    override fun getRestaurants(favourite: Boolean): LiveData<List<RestaurantShort>> {
+        if (favourite)
+            return restaurantsDao.getFavouriteRestaurants().map { x -> x.map { it.toEntity() } }
+        return restaurantsDao.getMarkedRestaurants().map { x -> x.map { it.toEntity() } }
     }
 }

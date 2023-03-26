@@ -35,6 +35,7 @@ import com.example.recommendationapp.presentation.map.viewmodel.MapViewModelFact
 import com.example.recommendationapp.presentation.restaurant.view.RestaurantActivity
 import com.example.recommendationapp.presentation.search.view.SearchActivity
 import com.example.recommendationapp.presentation.splash.view.SplashActivity
+import com.example.recommendationapp.utils.Common
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -45,6 +46,7 @@ import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.mapkit.search.*
 import com.yandex.runtime.image.ImageProvider
+import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 
 
@@ -53,6 +55,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
     private lateinit var viewModel: MapViewModel
     private lateinit var mapObjects: MapObjectCollection
     private lateinit var bottomSheet: MapBottomSheet
+    private val disposables = CompositeDisposable()
 
     private var mapPosition: Point = Point(55.87, 37.7)
     private var mapZoom = 16f
@@ -82,6 +85,14 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
         setupBottomSheetCall()
         setupSearchActivityCall()
         setupMapZoom()
+
+        binding.recommendationsBtn.setOnClickListener {
+            binding.recommendationsBtn.isChecked = !binding.recommendationsBtn.isChecked
+            viewModel.getRestaurantsInArea(
+                binding.recommendationsBtn.isChecked,
+                binding.mapview.map.visibleRegion
+            )
+        }
 
         binding.mapview.map.addCameraListener(this)
         mapObjects = binding.mapview.map.mapObjects
@@ -128,7 +139,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
             binding.restaurantBubble.restaurantName.text = place.name
             binding.restaurantBubble.restaurantAddress.text = place.address
             binding.restaurantBubble.restaurantTags.text = place.categories
-            binding.restaurantBubble.restaurantImage.load(getImageAddress(place.photo)) {
+            binding.restaurantBubble.restaurantImage.load(Common.getImageAddress(place.photo)) {
                 crossfade(true)
                 error(R.drawable.image_broken_24)
                 fallback(R.drawable.image_broken_24)
@@ -231,12 +242,16 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
         }
     }
 
-    private fun getImageAddress(id: Int) = "http://elesinsv.fvds.ru:8080/assets/cafes/$id.jpg"
-
     override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
         if (mapObject is PlacemarkMapObject)
             activity?.startActivity(Intent(activity, RestaurantActivity::class.java))
         return true
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposables.dispose()
+        disposables.clear()
     }
 
     companion object {

@@ -21,6 +21,7 @@ class SplashViewModel(
     private val errorLiveData = MutableLiveData<Throwable>()
     private val completeLiveData = MutableLiveData<Boolean>()
     private val recommendationsCompleteLiveData = MutableLiveData<Boolean>()
+    private val favouritesCompleteLiveData = MutableLiveData<Boolean>()
     private val disposables = CompositeDisposable()
 
     fun cacheAllRestaurants() {
@@ -71,6 +72,30 @@ class SplashViewModel(
         )
     }
 
+    fun getFavourites(userId: Int) {
+        disposables.add(recommendationInteractor.getFavourite(userId)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(this::putFavouritesToDb, errorLiveData::setValue)
+        )
+    }
+
+    private fun putFavouritesToDb(restaurants: List<RestaurantShort>) {
+        disposables.add(databaseInteractor.makeFavourite(restaurants)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ favouritesCompleteLiveData.postValue(true) }, errorLiveData::setValue)
+        )
+    }
+
     override fun onCleared() {
         super.onCleared()
         disposables.dispose()
@@ -91,6 +116,10 @@ class SplashViewModel(
 
     fun getRecommendationsCompleteLiveData(): LiveData<Boolean> {
         return recommendationsCompleteLiveData
+    }
+
+    fun getFavouritesCompleteLiveData(): LiveData<Boolean> {
+        return favouritesCompleteLiveData
     }
 
     companion object {

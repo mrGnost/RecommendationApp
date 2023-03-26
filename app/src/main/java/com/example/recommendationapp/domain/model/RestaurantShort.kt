@@ -11,5 +11,7 @@ data class RestaurantShort(
     val address: String,
     val location: Location,
     val categories: String,
-    val favourite: Boolean?
+    val favourite: Boolean,
+    val recommended: Boolean,
+    val marked: Boolean
 ) : Parcelable

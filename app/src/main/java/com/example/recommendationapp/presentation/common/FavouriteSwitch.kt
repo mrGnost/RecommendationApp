@@ -16,6 +16,7 @@ class FavouriteSwitch
     private val binding: SwitchFavouriteBinding =
         SwitchFavouriteBinding.inflate(LayoutInflater.from(context), this, false)
     private var favourite = true
+    private lateinit var mSwitchChangeListener: () -> Unit
 
     var isFavourite: Boolean
         get() = favourite
@@ -35,9 +36,15 @@ class FavouriteSwitch
         isFavourite = true
         binding.favChip.setOnClickListener {
             isFavourite = true
+            mSwitchChangeListener()
         }
         binding.markChip.setOnClickListener {
             isFavourite = false
+            mSwitchChangeListener()
         }
+    }
+
+    fun setOnSwitchChangeListener(listener: () -> Unit) {
+        mSwitchChangeListener = listener
     }
 }
