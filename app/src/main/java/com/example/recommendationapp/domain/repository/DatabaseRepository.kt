@@ -28,4 +28,6 @@ interface DatabaseRepository {
     ): Single<List<RestaurantShort>>
 
     fun getRestaurants(favourite: Boolean): LiveData<List<RestaurantShort>>
+
+    fun findRestaurants(prefix: String): Single<List<RestaurantShort>>
 }

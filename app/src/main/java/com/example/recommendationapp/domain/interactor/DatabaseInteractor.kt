@@ -32,9 +32,11 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
         leftLon: Double,
         rightLat: Double,
         rightLon: Double
-    ): Single<List<RestaurantShort>> =
-        databaseRepository.getInArea(recommended, leftLat, leftLon, rightLat, rightLon)
+    ) = databaseRepository.getInArea(recommended, leftLat, leftLon, rightLat, rightLon)
 
-    fun getRestaurants(favourite: Boolean): LiveData<List<RestaurantShort>> =
+    fun getRestaurants(favourite: Boolean) =
         databaseRepository.getRestaurants(favourite)
+
+    fun findRestaurants(prefix: String) =
+        databaseRepository.findRestaurants(prefix)
 }

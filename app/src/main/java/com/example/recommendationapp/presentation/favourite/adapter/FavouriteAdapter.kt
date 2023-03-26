@@ -36,7 +36,6 @@ class FavouriteAdapter(
     fun setData(newData: List<RestaurantShort>, favourite: Boolean) {
         restaurants = newData
         notifyDataSetChanged()
-        //notifyItemRangeChanged(0, newData.size)
     }
 }
 

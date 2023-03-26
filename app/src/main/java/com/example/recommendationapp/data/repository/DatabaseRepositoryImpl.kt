@@ -83,4 +83,10 @@ class DatabaseRepositoryImpl
             return restaurantsDao.getFavouriteRestaurants().map { x -> x.map { it.toEntity() } }
         return restaurantsDao.getMarkedRestaurants().map { x -> x.map { it.toEntity() } }
     }
+
+    override fun findRestaurants(prefix: String): Single<List<RestaurantShort>> {
+        return Single.fromCallable {
+            restaurantsDao.findRestaurants(prefix).map { it.toEntity() }
+        }
+    }
 }

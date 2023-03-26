@@ -39,6 +39,11 @@ interface RestaurantsDao {
             "WHERE marked = 1")
     fun getMarkedRestaurants(): LiveData<List<RestaurantShortDataEntity>>
 
-    @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.FULL_INFO_TABLE_NAME} WHERE id = :id")
+    @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.FULL_INFO_TABLE_NAME} " +
+            "WHERE id = :id")
     fun getRestaurantInfo(id: Int): RestaurantDataEntity
+
+    @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
+            "WHERE name LIKE :prefix || '%'")
+    fun findRestaurants(prefix: String): List<RestaurantShortDataEntity>
 }
