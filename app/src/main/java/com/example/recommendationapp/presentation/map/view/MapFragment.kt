@@ -1,8 +1,12 @@
 package com.example.recommendationapp.presentation.map.view
 
+import android.annotation.SuppressLint
+import android.content.Context.LOCATION_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,9 +23,7 @@ import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.FragmentMapBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
-import com.example.recommendationapp.domain.interactor.LocationInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
-import com.example.recommendationapp.domain.model.Location
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModel
@@ -38,17 +40,18 @@ import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
-import com.yandex.mapkit.search.*
 import com.yandex.runtime.image.ImageProvider
 import io.reactivex.disposables.CompositeDisposable
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
-class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
+class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationListener {
     private lateinit var binding: FragmentMapBinding
     private lateinit var viewModel: MapViewModel
     private lateinit var mapObjects: MapObjectCollection
     private lateinit var bottomSheet: MapBottomSheet
+    private lateinit var locationManager: LocationManager
     private val disposables = CompositeDisposable()
 
     private var mapPosition: Point = Point(55.87, 37.7)
@@ -58,8 +61,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
-    @Inject
-    lateinit var locationInteractor: LocationInteractor
     @Inject
     lateinit var schedulers: SchedulerProvider
 
@@ -81,6 +82,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
         setupBottomSheetCall()
         setupSearchActivityCall()
         setupMapZoom()
+        setupLocationUpdates()
 
         binding.recommendationsBtn.setOnClickListener {
             binding.recommendationsBtn.isChecked = !binding.recommendationsBtn.isChecked
@@ -91,7 +93,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
         }
 
         binding.currentPosFab.setOnClickListener {
-            viewModel.getCurrentLocation()
+            moveMap()
         }
 
         binding.mapview.map.addCameraListener(this)
@@ -99,7 +101,14 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
         moveMap()
     }
 
-    fun createBitmapFromView(view: View, width: Int, height: Int): Bitmap? {
+    @SuppressLint("MissingPermission")
+    private fun setupLocationUpdates() {
+        locationManager = activity?.getSystemService(LOCATION_SERVICE) as LocationManager
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+            TimeUnit.MINUTES.toMillis(5), 100F, this)
+    }
+
+    private fun createBitmapFromView(view: View, width: Int, height: Int): Bitmap? {
         if (width > 0 && height > 0) {
             view.measure(
                 View.MeasureSpec.makeMeasureSpec(
@@ -125,14 +134,13 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
     private fun createViewModel() {
         viewModel = ViewModelProvider(
             this, MapViewModelFactory(
-                recommendationInteractor, databaseInteractor, locationInteractor, schedulers)
+                recommendationInteractor, databaseInteractor, schedulers)
         )[MapViewModel::class.java]
     }
 
     private fun observeLiveData() {
         viewModel.getRestaurantsLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
-        viewModel.getLocationLiveData().observe(viewLifecycleOwner, this::moveToLocation)
     }
 
     private fun drawRestaurants(restaurants: List<RestaurantShort>) {
@@ -162,12 +170,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
             }
 
         }
-    }
-
-    private fun moveToLocation(location: Location) {
-        Log.d("LOCATION_ACQUIRED", "${location.latitude}, ${location.longitude}")
-        mapPosition = Point(location.latitude, location.longitude)
-        moveMap()
     }
 
     private fun showError(throwable: Throwable) {
@@ -260,6 +262,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
         super.onDestroy()
         disposables.dispose()
         disposables.clear()
+        locationManager.removeUpdates(this)
     }
 
     companion object {
@@ -271,5 +274,9 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
         fun newInstance(): MapFragment {
             return MapFragment()
         }
+    }
+
+    override fun onLocationChanged(location: android.location.Location) {
+        mapPosition = Point(location.latitude, location.longitude)
     }
 }

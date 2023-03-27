@@ -2,13 +2,9 @@ package com.example.recommendationapp.di
 
 import androidx.room.RoomDatabase
 import com.example.recommendationapp.data.datastore.db.RoomRestaurantsDatabase
-import com.example.recommendationapp.data.location.LocationSource
-import com.example.recommendationapp.data.location.LocationSourceImpl
 import com.example.recommendationapp.data.repository.DatabaseRepositoryImpl
-import com.example.recommendationapp.data.repository.LocationRepositoryImpl
 import com.example.recommendationapp.data.repository.RecommendationRepositoryImpl
 import com.example.recommendationapp.domain.repository.DatabaseRepository
-import com.example.recommendationapp.domain.repository.LocationRepository
 import com.example.recommendationapp.domain.repository.RecommendationRepository
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.example.recommendationapp.utils.scheduler.SchedulerProviderImpl
@@ -24,14 +20,8 @@ interface BindModule {
     fun bindDatabaseRepository(impl: DatabaseRepositoryImpl): DatabaseRepository
 
     @Binds
-    fun bindLocationRepository(impl: LocationRepositoryImpl): LocationRepository
-
-    @Binds
     fun bindRoomDatabase(impl: RoomRestaurantsDatabase): RoomDatabase
 
     @Binds
     fun bindSchedulers(impl: SchedulerProviderImpl): SchedulerProvider
-
-    @Binds
-    fun bindLocation(impl: LocationSourceImpl): LocationSource
 }

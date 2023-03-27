@@ -10,16 +10,13 @@ import android.widget.FrameLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recommendationapp.App
-import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.BottomSheetMapBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
-import com.example.recommendationapp.domain.interactor.LocationInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.presentation.map.adapter.FiltersAdapter
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModel
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModelFactory
-import com.example.recommendationapp.presentation.search.adapter.SearchAdapter
 import com.example.recommendationapp.presentation.splash.view.SplashActivity
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
