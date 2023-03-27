@@ -13,6 +13,7 @@ import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.BottomSheetMapBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.LocationInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.presentation.map.adapter.FiltersAdapter
@@ -40,6 +41,8 @@ class MapBottomSheet : BottomSheetDialogFragment() {
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
+    @Inject
+    lateinit var locationInteractor: LocationInteractor
     @Inject
     lateinit var schedulers: SchedulerProvider
 
@@ -76,7 +79,8 @@ class MapBottomSheet : BottomSheetDialogFragment() {
 
     private fun createViewModel() {
         viewModel = ViewModelProvider(
-            this, MapViewModelFactory(recommendationInteractor, databaseInteractor, schedulers)
+            this, MapViewModelFactory(
+                recommendationInteractor, databaseInteractor, locationInteractor, schedulers)
         )[MapViewModel::class.java]
     }
 

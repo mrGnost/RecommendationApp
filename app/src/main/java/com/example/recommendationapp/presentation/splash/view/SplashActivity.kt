@@ -10,7 +10,7 @@ import com.example.recommendationapp.App
 import com.example.recommendationapp.databinding.ActivitySplashBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
-import com.example.recommendationapp.presentation.LauncherActivity
+import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.splash.viewmodel.SplashViewModel
 import com.example.recommendationapp.presentation.splash.viewmodel.SplashViewModelFactory
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider

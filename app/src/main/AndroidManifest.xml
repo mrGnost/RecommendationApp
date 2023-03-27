@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".presentation.LauncherActivity"
+            android:name=".presentation.launcher.view.LauncherActivity"
             android:launchMode="singleTop"
             android:exported="true">
             <intent-filter>

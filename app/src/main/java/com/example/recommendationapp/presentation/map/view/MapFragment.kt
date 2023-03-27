@@ -1,24 +1,16 @@
 package com.example.recommendationapp.presentation.map.view
 
-import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.marginStart
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import coil.load
 import coil.size.Scale
@@ -27,9 +19,11 @@ import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.FragmentMapBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.LocationInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Location
 import com.example.recommendationapp.domain.model.RestaurantShort
-import com.example.recommendationapp.presentation.LauncherActivity
+import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModel
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModelFactory
 import com.example.recommendationapp.presentation.restaurant.view.RestaurantActivity
@@ -65,6 +59,8 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
     @Inject
+    lateinit var locationInteractor: LocationInteractor
+    @Inject
     lateinit var schedulers: SchedulerProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,6 +88,10 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
                 binding.recommendationsBtn.isChecked,
                 binding.mapview.map.visibleRegion
             )
+        }
+
+        binding.currentPosFab.setOnClickListener {
+            viewModel.getCurrentLocation()
         }
 
         binding.mapview.map.addCameraListener(this)
@@ -124,13 +124,15 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
 
     private fun createViewModel() {
         viewModel = ViewModelProvider(
-            this, MapViewModelFactory(recommendationInteractor, databaseInteractor, schedulers)
+            this, MapViewModelFactory(
+                recommendationInteractor, databaseInteractor, locationInteractor, schedulers)
         )[MapViewModel::class.java]
     }
 
     private fun observeLiveData() {
         viewModel.getRestaurantsLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
+        viewModel.getLocationLiveData().observe(viewLifecycleOwner, this::moveToLocation)
     }
 
     private fun drawRestaurants(restaurants: List<RestaurantShort>) {
@@ -160,6 +162,12 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener {
             }
 
         }
+    }
+
+    private fun moveToLocation(location: Location) {
+        Log.d("LOCATION_ACQUIRED", "${location.latitude}, ${location.longitude}")
+        mapPosition = Point(location.latitude, location.longitude)
+        moveMap()
     }
 
     private fun showError(throwable: Throwable) {

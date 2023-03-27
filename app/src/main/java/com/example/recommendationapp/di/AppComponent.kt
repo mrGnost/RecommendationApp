@@ -1,7 +1,7 @@
 package com.example.recommendationapp.di
 
 import android.content.Context
-import com.example.recommendationapp.presentation.LauncherActivity
+import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.favourite.view.FavouriteFragment
 import com.example.recommendationapp.presentation.map.view.MapBottomSheet
 import com.example.recommendationapp.presentation.map.view.MapFragment
@@ -17,6 +17,7 @@ import javax.inject.Singleton
     modules = [
         RetrofitModule::class,
         RoomModule::class,
+        LocationModule::class,
         BindModule::class
     ]
 )
