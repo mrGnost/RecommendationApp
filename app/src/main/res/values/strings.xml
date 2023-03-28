@@ -35,4 +35,7 @@
     <string name="favourite">Избранное</string>
     <string name="loading_data">Загрузка данных...</string>
     <string name="tags_and_compilations">Теги и подборки</string>
+    <string name="dish_photos">Фотографии</string>
+    <string name="chain">Филиалы</string>
+    <string name="similar_places">Похожие места</string>
 </resources>

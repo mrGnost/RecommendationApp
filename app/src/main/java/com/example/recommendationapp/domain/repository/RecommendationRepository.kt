@@ -16,4 +16,6 @@ interface RecommendationRepository {
     fun getRecommended(userId: Int): Single<List<RestaurantShort>>
 
     fun getFavourite(userId: Int): Single<List<RestaurantShort>>
+
+    fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>>
 }

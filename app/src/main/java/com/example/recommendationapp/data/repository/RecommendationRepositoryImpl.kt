@@ -30,4 +30,8 @@ class RecommendationRepositoryImpl
     override fun getFavourite(userId: Int): Single<List<RestaurantShort>> {
         return api.getFavourite(userId).map { x -> x.map { it.toEntity() } }
     }
+
+    override fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>> {
+        return api.getSimilarPlaces(placeId, amount).map { x -> x.map { it.toEntity() } }
+    }
 }

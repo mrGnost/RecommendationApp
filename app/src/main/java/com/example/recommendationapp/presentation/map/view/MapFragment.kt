@@ -179,7 +179,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         binding.restaurantInfoBubble.restaurantName.text = place.name
         binding.restaurantInfoBubble.restaurantAddress.text = place.address
         binding.restaurantInfoBubble.restaurantTags.text = place.categories
-        binding.restaurantInfoBubble.restaurantImage.load(Common.getImageAddress(place.photo)) {
+        binding.restaurantInfoBubble.restaurantImage.load(Common.getPlaceImageAddress(place.photo)) {
             crossfade(true)
             error(R.drawable.image_broken_24)
             fallback(R.drawable.image_broken_24)

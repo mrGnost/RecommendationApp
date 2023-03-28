@@ -20,4 +20,8 @@ interface RecommendationApi {
 
     @GET("users/{user_id}/favorite-cafes")
     fun getFavourite(@Path("user_id") id: Int): Single<List<RestaurantShortDataEntityResponse>>
+
+    @GET("cafes/{id}/similar/{amount}")
+    fun getSimilarPlaces(@Path("id") id: Int, @Path("amount") amount: Int):
+            Single<List<RestaurantShortDataEntityResponse>>
 }

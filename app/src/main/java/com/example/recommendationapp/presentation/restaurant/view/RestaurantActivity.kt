@@ -1,5 +1,6 @@
 package com.example.recommendationapp.presentation.restaurant.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -8,6 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import coil.size.Scale
 import com.example.recommendationapp.App
@@ -17,15 +19,13 @@ import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
+import com.example.recommendationapp.presentation.restaurant.adapter.ChainAdapter
 import com.example.recommendationapp.presentation.restaurant.adapter.PhotoAdapter
 import com.example.recommendationapp.presentation.restaurant.adapter.SimilarAdapter
 import com.example.recommendationapp.presentation.restaurant.viewmodel.RestaurantViewModel
 import com.example.recommendationapp.presentation.restaurant.viewmodel.RestaurantViewModelFactory
-import com.example.recommendationapp.presentation.search.adapter.SearchAdapter
-import com.example.recommendationapp.presentation.search.view.SearchActivity
-import com.example.recommendationapp.presentation.search.viewmodel.SearchViewModel
-import com.example.recommendationapp.presentation.search.viewmodel.SearchViewModelFactory
 import com.example.recommendationapp.utils.Common
+import com.example.recommendationapp.utils.callback.RestaurantClickListener
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -37,6 +37,7 @@ class RestaurantActivity : AppCompatActivity() {
     private lateinit var menu: Menu
     private lateinit var viewModel: RestaurantViewModel
     private lateinit var photoAdapter: PhotoAdapter
+    private lateinit var chainAdapter: ChainAdapter
     private lateinit var similarAdapter: SimilarAdapter
     private lateinit var restaurant: Restaurant
     private var isMarked = false
@@ -51,6 +52,20 @@ class RestaurantActivity : AppCompatActivity() {
     @Inject
     lateinit var schedulers: SchedulerProvider
 
+    private val clickListener = object : RestaurantClickListener {
+        override fun onClick(restaurantShort: RestaurantShort) {
+            startActivity(
+                Intent(this@RestaurantActivity, RestaurantActivity::class.java)
+                    .putExtra("restaurant_id", restaurantShort.id)
+                    .putExtra("restaurant_name", restaurantShort.name)
+                    .putExtra("is_favourite", restaurantShort.favourite)
+                    .putExtra("is_marked", restaurantShort.marked)
+                    .putExtra("is_recommended", restaurantShort.recommended)
+            )
+        }
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = FragmentRestaurantBinding.inflate(layoutInflater)
@@ -61,6 +76,7 @@ class RestaurantActivity : AppCompatActivity() {
         setSupportActionBar(binding.topAppBar)
 
         viewModel.getRestaurantInfo(intent.getIntExtra("restaurant_id", 1))
+        viewModel.getSimilar(intent.getIntExtra("restaurant_id", 1), 10)
 
         binding.topAppBar.setNavigationOnClickListener {
             finish()
@@ -99,6 +115,7 @@ class RestaurantActivity : AppCompatActivity() {
         viewModel.getErrorLiveData().observe(this, this::showError)
         viewModel.getProgressLiveData().observe(this, this::showProgress)
         viewModel.getRestaurantLiveData().observe(this, this::showResults)
+        viewModel.getSimilarLiveData().observe(this, this::showSimilar)
     }
 
     private fun showProgress(isVisible: Boolean) {
@@ -117,7 +134,7 @@ class RestaurantActivity : AppCompatActivity() {
         changeMarkDisplay()
         changeLikeDisplay()
 
-        binding.topImage.load(Common.getImageAddress(restaurant.photo)) {
+        binding.topImage.load(Common.getPlaceImageAddress(restaurant.photo)) {
             crossfade(true)
             error(R.drawable.image_broken_24)
             fallback(R.drawable.image_broken_24)
@@ -133,11 +150,17 @@ class RestaurantActivity : AppCompatActivity() {
             changeLike(restaurant)
         }
         binding.contentRestaurant.tags.text = restaurant.tags
+        setupPhotoRecycler(restaurant.dishPhotos)
+        setupChainRecycler(restaurant.chainCafes)
     }
 
     private fun showError(throwable: Throwable) {
         Log.d(TAG, "showError() called with: throwable = $throwable")
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+    }
+
+    private fun showSimilar(places: List<RestaurantShort>) {
+        setupSimilarRecycler(places)
     }
 
     private fun changeMarkDisplay() {
@@ -170,6 +193,27 @@ class RestaurantActivity : AppCompatActivity() {
         isFavourite = !isFavourite
         viewModel.setFavourite(restaurant.id, isMarked)
         changeLikeDisplay()
+    }
+
+    private fun setupPhotoRecycler(dishes: List<Int>) {
+        photoAdapter = PhotoAdapter(dishes)
+        binding.contentRestaurant.dishRecycler.adapter = photoAdapter
+        binding.contentRestaurant.dishRecycler.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+    }
+
+    private fun setupChainRecycler(chain: List<RestaurantShort>) {
+        chainAdapter = ChainAdapter(chain, clickListener)
+        binding.contentRestaurant.chainRecycler.adapter = chainAdapter
+        binding.contentRestaurant.chainRecycler.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+    }
+
+    private fun setupSimilarRecycler(places: List<RestaurantShort>) {
+        similarAdapter = SimilarAdapter(places, clickListener)
+        binding.contentRestaurant.similarRecycler.adapter = similarAdapter
+        binding.contentRestaurant.similarRecycler.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
     }
 
     companion object {

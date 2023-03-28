@@ -9,10 +9,9 @@ import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
 import coil.size.Scale
-import coil.transform.CircleCropTransformation
 import com.example.recommendationapp.R
 import com.example.recommendationapp.domain.model.RestaurantShort
-import com.example.recommendationapp.utils.Common.getImageAddress
+import com.example.recommendationapp.utils.Common.getPlaceImageAddress
 import com.example.recommendationapp.utils.callback.RestaurantClickListener
 
 class FavouriteAdapter(
@@ -61,7 +60,7 @@ class FavouriteViewHolder(itemView: View) : ViewHolder(itemView) {
         } else {
             mark.setImageResource(R.drawable.ic_bookmark_24)
         }
-        imageView.load(getImageAddress(restaurant.photo)) {
+        imageView.load(getPlaceImageAddress(restaurant.photo)) {
             crossfade(true)
             error(R.drawable.image_broken_24)
             fallback(R.drawable.image_broken_24)

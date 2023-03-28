@@ -28,4 +28,8 @@ class RecommendationInteractor
     fun getFavourite(userId: Int): Single<List<RestaurantShort>> {
         return recommendationRepository.getFavourite(userId)
     }
+
+    fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>> {
+        return recommendationRepository.getSimilar(placeId, amount)
+    }
 }

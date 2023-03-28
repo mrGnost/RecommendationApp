@@ -54,7 +54,7 @@ class SearchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             mark.setImageResource(R.drawable.ic_favorite_24)
         else
             mark.setImageResource(R.drawable.ic_favorite_border_24)
-        imageView.load(Common.getImageAddress(restaurant.photo)) {
+        imageView.load(Common.getPlaceImageAddress(restaurant.photo)) {
             crossfade(true)
             error(R.drawable.image_broken_24)
             fallback(R.drawable.image_broken_24)

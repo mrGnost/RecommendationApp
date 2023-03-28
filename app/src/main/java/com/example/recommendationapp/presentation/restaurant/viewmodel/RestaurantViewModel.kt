@@ -56,6 +56,17 @@ class RestaurantViewModel(
             .subscribe({ Log.d(DB, "restaurant with id=$id mark changed") }, errorLiveData::setValue))
     }
 
+    fun getSimilar(id: Int, amount: Int) {
+        disposables.add(recommendationInteractor.getSimilar(id, amount)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(similarLiveData::setValue, errorLiveData::setValue))
+    }
+
     fun getErrorLiveData(): LiveData<Throwable> {
         return errorLiveData
     }
@@ -66,6 +77,10 @@ class RestaurantViewModel(
 
     fun getRestaurantLiveData(): LiveData<Restaurant> {
         return restaurantLiveData
+    }
+
+    fun getSimilarLiveData(): LiveData<List<RestaurantShort>> {
+        return similarLiveData
     }
 
     companion object {
