@@ -36,7 +36,7 @@
                 android:layout_height="?attr/actionBarSize"
                 app:title="Океан"
                 app:menu="@menu/restaurant_top_bar_menu"
-                app:navigationIcon="@drawable/ic_back_24"
+                app:navigationIcon="@drawable/ic_back_circle_24"
                 style="@style/Widget.MaterialComponents.Toolbar.Primary"
                 app:layout_scrollFlags="scroll|enterAlways|snap"
                 android:elevation="0dp"

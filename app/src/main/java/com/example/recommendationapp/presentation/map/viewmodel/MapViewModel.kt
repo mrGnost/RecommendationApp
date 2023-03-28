@@ -22,6 +22,7 @@ class MapViewModel(
     private val progressLiveData = MutableLiveData<Boolean>()
     private val errorLiveData = MutableLiveData<Throwable>()
     private val restaurantsLiveData = MutableLiveData<List<RestaurantShort>>()
+    private val recommendedCountLiveData = MutableLiveData<Int>()
     private val disposables = CompositeDisposable()
 
     fun getRestaurantsInArea(recommended: Boolean, area: VisibleRegion) {
@@ -42,6 +43,19 @@ class MapViewModel(
                 .subscribeOn(schedulers.io())
                 .observeOn(schedulers.ui())
                 .subscribe(restaurantsLiveData::setValue, errorLiveData::setValue)
+        )
+    }
+
+    fun getRecommendedCount() {
+        disposables.add(
+            databaseInteractor.getRecommendedCount()
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe { progressLiveData.postValue(true) }
+                .doAfterTerminate { progressLiveData.postValue(false) }
+                .subscribeOn(schedulers.io())
+                .observeOn(schedulers.ui())
+                .subscribe(recommendedCountLiveData::setValue, errorLiveData::setValue)
         )
     }
 
@@ -70,6 +84,10 @@ class MapViewModel(
 
     fun getRestaurantsLiveData(): LiveData<List<RestaurantShort>> {
         return restaurantsLiveData
+    }
+
+    fun getRecommendedCountLiveData(): LiveData<Int> {
+        return recommendedCountLiveData
     }
 
     fun getFiltersLiveData(): LiveData<List<Filter>> {

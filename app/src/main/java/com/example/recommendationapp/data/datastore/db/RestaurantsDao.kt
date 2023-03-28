@@ -58,6 +58,10 @@ interface RestaurantsDao {
     @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.FILTERS_TABLE_NAME}")
     fun getFilters(): LiveData<List<FilterDataEntity>>
 
+    @Query("SELECT COUNT(id) FROM ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
+            "WHERE recommended = 1")
+    fun getRecommendedCount(): Int
+
     @Query("UPDATE ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
             "SET favourite = :favourite WHERE id = :id")
     fun changeFavouriteById(id: Int, favourite: Int)

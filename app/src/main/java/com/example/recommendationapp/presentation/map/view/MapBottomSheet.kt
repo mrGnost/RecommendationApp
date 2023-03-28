@@ -39,8 +39,6 @@ class MapBottomSheet : BottomSheetDialogFragment() {
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
     @Inject
-    lateinit var locationInteractor: LocationInteractor
-    @Inject
     lateinit var schedulers: SchedulerProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +75,7 @@ class MapBottomSheet : BottomSheetDialogFragment() {
     private fun createViewModel() {
         viewModel = ViewModelProvider(
             this, MapViewModelFactory(
-                recommendationInteractor, databaseInteractor, locationInteractor, schedulers)
+                recommendationInteractor, databaseInteractor, schedulers)
         )[MapViewModel::class.java]
     }
 

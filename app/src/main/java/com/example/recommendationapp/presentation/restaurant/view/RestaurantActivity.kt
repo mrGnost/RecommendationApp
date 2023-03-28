@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import coil.load
 import coil.size.Scale
@@ -34,6 +35,9 @@ class RestaurantActivity : AppCompatActivity() {
     private lateinit var viewModel: RestaurantViewModel
     private lateinit var photoAdapter: PhotoAdapter
     private lateinit var similarAdapter: SimilarAdapter
+    private var isMarked = false
+    private var isFavourite = false
+    private var isRecommended = false
     private val disposables = CompositeDisposable()
 
     @Inject
@@ -52,6 +56,10 @@ class RestaurantActivity : AppCompatActivity() {
         observeLiveData()
 
         viewModel.getRestaurantInfo(intent.getIntExtra("restaurant_id", 1))
+
+        binding.topAppBar.setNavigationOnClickListener {
+            finish()
+        }
     }
 
     private fun createViewModel() {
@@ -73,8 +81,27 @@ class RestaurantActivity : AppCompatActivity() {
 
     private fun showResults(restaurant: Restaurant) {
         Log.d(TAG_ADD, "showResults() called with: restaurant = ${restaurant.name}")
-        val isMarked = intent.getBooleanExtra("is_marked", false)
-        val isFavourite = intent.getBooleanExtra("is_favourite", false)
+
+        isMarked = intent.getBooleanExtra("is_marked", false)
+        isFavourite = intent.getBooleanExtra("is_favourite", false)
+        isRecommended = intent.getBooleanExtra("is_recommended", false)
+
+        changeMarkDisplay()
+        changeLikeDisplay()
+
+        binding.topAppBar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.mark -> {
+                    changeMark(restaurant)
+                    true
+                }
+                R.id.like -> {
+                    changeLike(restaurant)
+                    true
+                }
+                else -> false
+            }
+        }
 
         supportActionBar?.title = restaurant.name
         binding.topAppBar.title = restaurant.name
@@ -89,21 +116,11 @@ class RestaurantActivity : AppCompatActivity() {
         }
         binding.contentRestaurant.address.text = restaurant.address
         binding.contentRestaurant.workHours.text = restaurant.workingHours
-        if (isMarked)
-            binding.contentRestaurant.recommendHolder.visibility = View.GONE
-        else {
-            binding.contentRestaurant.recommendBtn.setOnClickListener {
-                viewModel.setMark(restaurant.id, true)
-                binding.contentRestaurant.recommendHolder.visibility = View.GONE
-            }
+        binding.contentRestaurant.recommendBtn.setOnClickListener {
+            changeMark(restaurant)
         }
-        if (isFavourite)
-            binding.contentRestaurant.favouriteHolder.visibility = View.GONE
-        else {
-            binding.contentRestaurant.favouriteBtn.setOnClickListener {
-                viewModel.setFavourite(restaurant.id, true)
-                binding.contentRestaurant.favouriteHolder.visibility = View.GONE
-            }
+        binding.contentRestaurant.favouriteBtn.setOnClickListener {
+            changeLike(restaurant)
         }
         binding.contentRestaurant.tags.text = restaurant.tags
     }
@@ -111,6 +128,38 @@ class RestaurantActivity : AppCompatActivity() {
     private fun showError(throwable: Throwable) {
         Log.d(TAG, "showError() called with: throwable = $throwable")
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+    }
+
+    private fun changeMarkDisplay() {
+        binding.topAppBar.menu.getItem(0).icon = ContextCompat.getDrawable(
+            this,
+            if (isMarked) R.drawable.ic_bookmark_circle_24
+            else R.drawable.ic_bookmark_border_circle_24
+        )
+        binding.contentRestaurant.recommendHolder.visibility =
+            if (!isMarked && isRecommended) View.VISIBLE else View.GONE
+    }
+
+    private fun changeLikeDisplay() {
+        binding.topAppBar.menu.getItem(1).icon = ContextCompat.getDrawable(
+            this,
+            if (isFavourite) R.drawable.ic_favorite_circle_24
+            else R.drawable.ic_favorite_border_circle_24
+        )
+        binding.contentRestaurant.favouriteHolder.visibility =
+            if (!isFavourite) View.VISIBLE else View.GONE
+    }
+
+    private fun changeMark(restaurant: Restaurant) {
+        isMarked = !isMarked
+        viewModel.setMark(restaurant.id, isMarked)
+        changeMarkDisplay()
+    }
+
+    private fun changeLike(restaurant: Restaurant) {
+        isFavourite = !isFavourite
+        viewModel.setFavourite(restaurant.id, isMarked)
+        changeLikeDisplay()
     }
 
     companion object {

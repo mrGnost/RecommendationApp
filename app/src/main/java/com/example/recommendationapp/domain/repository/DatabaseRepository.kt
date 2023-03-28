@@ -38,6 +38,8 @@ interface DatabaseRepository {
 
     fun changeCheckedFilter(filter: Filter, value: Boolean, filterId: Int): Completable
 
+    fun getRecommendedCount(): Single<Int>
+
     fun changeFavourite(id: Int, favourite: Boolean): Completable
 
     fun changeMark(id: Int, marked: Boolean): Completable

@@ -44,6 +44,7 @@ import com.yandex.runtime.image.ImageProvider
 import io.reactivex.disposables.CompositeDisposable
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.math.pow
 
 
 class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationListener {
@@ -55,7 +56,10 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private val disposables = CompositeDisposable()
 
     private var mapPosition: Point = Point(55.87, 37.7)
+    private var userPosition: Point = Point(55.87, 37.7)
     private var mapZoom = 16f
+    private var visiblePlaces: List<RestaurantShort> = listOf()
+    private var expandedId: Int? = null
 
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
@@ -93,11 +97,13 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         }
 
         binding.currentPosFab.setOnClickListener {
+            mapPosition = userPosition
             moveMap()
         }
 
         binding.mapview.map.addCameraListener(this)
         mapObjects = binding.mapview.map.mapObjects
+        viewModel.getRecommendedCount()
         moveMap()
     }
 
@@ -141,40 +147,63 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private fun observeLiveData() {
         viewModel.getRestaurantsLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
+        viewModel.getRecommendedCountLiveData().observe(viewLifecycleOwner, this::displayRecommendedCount)
     }
 
     private fun drawRestaurants(restaurants: List<RestaurantShort>) {
+        visiblePlaces = restaurants
         mapObjects.clear()
         for (place in restaurants) {
-            binding.restaurantBubble.restaurantName.text = place.name
-            binding.restaurantBubble.restaurantAddress.text = place.address
-            binding.restaurantBubble.restaurantTags.text = place.categories
-            binding.restaurantBubble.restaurantImage.load(Common.getImageAddress(place.photo)) {
-                crossfade(true)
-                error(R.drawable.image_broken_24)
-                fallback(R.drawable.image_broken_24)
-                placeholder(R.drawable.image_placeholder_24)
-                transformations(CircleCropTransformation())
-                scale(Scale.FIT)
-                listener(
-                    onSuccess = { request, metadata ->
-                        val image = createBitmapFromView(binding.restaurantBubble.root, 0, 0)
-                        mapObjects.addPlacemark(
-                            Point(place.location.latitude, place.location.longitude),
-                            ImageProvider.fromBitmap(image)
-                        ).apply {
-                            addTapListener(this@MapFragment)
-                        }
-                    }
-                )
-            }
+            if (place.id == expandedId)
+                drawShortInfo(place)
+            else
+                drawName(place)
+        }
+    }
 
+    private fun drawName(place: RestaurantShort) {
+        binding.restaurantNameBubble.restaurantText.text = place.name
+        val image = createBitmapFromView(binding.restaurantNameBubble.root, 0, 0)
+        mapObjects.addPlacemark(
+            Point(place.location.latitude, place.location.longitude),
+            ImageProvider.fromBitmap(image)
+        ).apply {
+            addTapListener(this@MapFragment)
+        }
+    }
+
+    private fun drawShortInfo(place: RestaurantShort) {
+        binding.restaurantInfoBubble.restaurantName.text = place.name
+        binding.restaurantInfoBubble.restaurantAddress.text = place.address
+        binding.restaurantInfoBubble.restaurantTags.text = place.categories
+        binding.restaurantInfoBubble.restaurantImage.load(Common.getImageAddress(place.photo)) {
+            crossfade(true)
+            error(R.drawable.image_broken_24)
+            fallback(R.drawable.image_broken_24)
+            placeholder(R.drawable.image_placeholder_24)
+            transformations(CircleCropTransformation())
+            scale(Scale.FIT)
+            listener(
+                onSuccess = { request, metadata ->
+                    val image = createBitmapFromView(binding.restaurantInfoBubble.root, 0, 0)
+                    mapObjects.addPlacemark(
+                        Point(place.location.latitude, place.location.longitude),
+                        ImageProvider.fromBitmap(image)
+                    ).apply {
+                        addTapListener(this@MapFragment)
+                    }
+                }
+            )
         }
     }
 
     private fun showError(throwable: Throwable) {
         Log.d(SplashActivity.TAG, "showError() called with: throwable = $throwable")
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+    }
+
+    private fun displayRecommendedCount(count: Int) {
+        binding.recommendationsBtn.setCount(count)
     }
 
     private fun setupBottomSheetCall() {
@@ -245,6 +274,8 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         finished: Boolean
     ) {
         if (finished) {
+            expandedId = null
+            mapPosition = binding.mapview.map.cameraPosition.target
             viewModel.getRestaurantsInArea(
                 binding.recommendationsBtn.isChecked,
                 binding.mapview.map.visibleRegion
@@ -252,10 +283,44 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         }
     }
 
+    private fun findClosestPlace(point: Point): RestaurantShort {
+        var distance = 10000.0
+        var finalPlace: RestaurantShort? = null
+        for (place in visiblePlaces) {
+            val dist = (point.latitude - place.location.latitude).pow(2) * 3 +
+                    (point.longitude - place.location.longitude).pow(2)
+            if (dist < distance) {
+                distance = dist
+                finalPlace = place
+            }
+        }
+        return finalPlace!!
+    }
+
     override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
-        if (mapObject is PlacemarkMapObject)
-            activity?.startActivity(Intent(activity, RestaurantActivity::class.java))
+        if (mapObject is PlacemarkMapObject) {
+            val place = findClosestPlace(point)
+            if (place.id == expandedId) {
+                activity?.startActivity(
+                    Intent(activity, RestaurantActivity::class.java)
+                        .putExtra("restaurant_id", place.id)
+                        .putExtra("is_marked", place.marked)
+                        .putExtra("is_favourite", place.favourite)
+                        .putExtra("is_recommended", place.recommended)
+                )
+                return true
+            }
+            expandedId = place.id
+            drawRestaurants(visiblePlaces)
+            return true
+        }
+        expandedId = null
+        drawRestaurants(visiblePlaces)
         return true
+    }
+
+    override fun onLocationChanged(location: android.location.Location) {
+        userPosition = Point(location.latitude, location.longitude)
     }
 
     override fun onDestroy() {
@@ -274,9 +339,5 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         fun newInstance(): MapFragment {
             return MapFragment()
         }
-    }
-
-    override fun onLocationChanged(location: android.location.Location) {
-        mapPosition = Point(location.latitude, location.longitude)
     }
 }

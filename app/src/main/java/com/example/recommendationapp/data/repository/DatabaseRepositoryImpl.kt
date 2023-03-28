@@ -110,6 +110,12 @@ class DatabaseRepositoryImpl
         }
     }
 
+    override fun getRecommendedCount(): Single<Int> {
+        return Single.fromCallable {
+            restaurantsDao.getRecommendedCount()
+        }
+    }
+
     override fun changeFavourite(id: Int, favourite: Boolean): Completable {
         return Completable.fromRunnable {
             restaurantsDao.changeFavouriteById(id, if (favourite) 1 else 0)

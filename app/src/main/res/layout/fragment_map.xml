@@ -6,8 +6,14 @@
     android:layout_height="match_parent">
 
     <include
-        android:id="@+id/restaurant_bubble"
+        android:id="@+id/restaurant_info_bubble"
         layout="@layout/map_info_restaurant"
+        app:layout_constraintStart_toStartOf="@+id/mapview"
+        app:layout_constraintTop_toTopOf="@+id/mapview" />
+
+    <include
+        android:id="@+id/restaurant_name_bubble"
+        layout="@layout/map_name_restaurant"
         app:layout_constraintStart_toStartOf="@+id/mapview"
         app:layout_constraintTop_toTopOf="@+id/mapview" />
 

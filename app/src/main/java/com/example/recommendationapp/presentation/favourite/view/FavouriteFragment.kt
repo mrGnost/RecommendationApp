@@ -48,6 +48,7 @@ class FavouriteFragment : Fragment() {
                     .putExtra("restaurant_id", restaurantShort.id)
                     .putExtra("is_favourite", restaurantShort.favourite)
                     .putExtra("is_marked", restaurantShort.marked)
+                    .putExtra("is_recommended", restaurantShort.recommended)
             )
         }
     }

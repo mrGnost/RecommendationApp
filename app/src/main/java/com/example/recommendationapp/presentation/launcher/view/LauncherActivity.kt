@@ -30,7 +30,7 @@ class LauncherActivity : AppCompatActivity() {
         binding.bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.places_nav_item -> {
-                    checkPermission()
+                    return@setOnItemSelectedListener checkPermission()
                 }
                 R.id.fav_nav_item -> {
                     supportFragmentManager
@@ -44,8 +44,8 @@ class LauncherActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkPermission() {
-        if (ActivityCompat.checkSelfPermission(
+    private fun checkPermission(): Boolean {
+        return if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
@@ -54,8 +54,10 @@ class LauncherActivity : AppCompatActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             requestPermission(LOCATION_PERMISSION_REQUEST_CODE)
+            false
         } else {
             goToMap()
+            true
         }
     }
 

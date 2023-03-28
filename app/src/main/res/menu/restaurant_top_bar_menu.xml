@@ -9,13 +9,13 @@
 <!--        app:showAsAction="ifRoom" />-->
     <item
         android:id="@+id/mark"
-        android:icon="@drawable/ic_bookmark_border_24"
+        android:icon="@drawable/ic_bookmark_border_circle_24"
         android:title="@string/to_bookmarks"
         android:contentDescription="@string/to_bookmarks_descriprion"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/like"
-        android:icon="@drawable/ic_favorite_border_24"
+        android:icon="@drawable/ic_favorite_border_circle_24"
         android:title="@string/like"
         android:contentDescription="@string/like"
         app:showAsAction="always" />
