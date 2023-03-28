@@ -11,6 +11,7 @@ class MapViewModelFactory(
     private val databaseInteractor: DatabaseInteractor,
     private val schedulerProvider: SchedulerProvider
 ) : ViewModelProvider.Factory {
+
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return MapViewModel(
             recommendationInteractor, databaseInteractor, schedulerProvider

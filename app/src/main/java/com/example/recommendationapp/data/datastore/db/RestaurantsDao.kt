@@ -22,10 +22,13 @@ interface RestaurantsDao {
     fun updateRestaurantsShort(restaurants: List<RestaurantShortDataEntity>)
 
     @Update
-    fun updateRestaurantShort(restaurants: RestaurantShortDataEntity)
+    fun updateRestaurantShort(restaurant: RestaurantShortDataEntity)
 
     @Update
     fun updateFilter(filter: FilterDataEntity)
+
+    @Update
+    fun updateFilters(checked: List<FilterDataEntity>)
 
     @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
             "WHERE (latitude BETWEEN :leftLat AND :rightLat) " +

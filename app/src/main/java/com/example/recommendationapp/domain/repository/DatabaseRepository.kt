@@ -36,9 +36,13 @@ interface DatabaseRepository {
 
     fun getFilters(): LiveData<List<Filter>>
 
+    fun clearFilters(filters: List<Filter>): Completable
+
     fun changeCheckedFilter(filter: Filter, value: Boolean, filterId: Int): Completable
 
     fun getRecommendedCount(): Single<Int>
+
+    fun getFiltersCount(): LiveData<Int>
 
     fun changeFavourite(id: Int, favourite: Boolean): Completable
 

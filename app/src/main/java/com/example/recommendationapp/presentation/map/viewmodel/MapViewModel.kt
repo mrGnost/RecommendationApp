@@ -23,6 +23,7 @@ class MapViewModel(
     private val errorLiveData = MutableLiveData<Throwable>()
     private val restaurantsLiveData = MutableLiveData<List<RestaurantShort>>()
     private val recommendedCountLiveData = MutableLiveData<Int>()
+    private val recommendedFilterLiveData = MutableLiveData<Boolean>()
     private val disposables = CompositeDisposable()
 
     fun getRestaurantsInArea(recommended: Boolean, area: VisibleRegion) {
@@ -74,6 +75,21 @@ class MapViewModel(
         )
     }
 
+    fun clearAllFilters(filters: List<Filter>) {
+        disposables.add(databaseInteractor.clearFilters(filters)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(
+                { Log.d(DB, "filters cleared") },
+                errorLiveData::setValue
+            )
+        )
+    }
+
     fun getErrorLiveData(): LiveData<Throwable> {
         return errorLiveData
     }
@@ -92,6 +108,18 @@ class MapViewModel(
 
     fun getFiltersLiveData(): LiveData<List<Filter>> {
         return databaseInteractor.getFilters()
+    }
+
+    fun getFiltersCountLiveData(): LiveData<Int> {
+        return databaseInteractor.getFiltersCount()
+    }
+
+    fun getRecommendedFilterLiveData(): LiveData<Boolean> {
+        return recommendedFilterLiveData
+    }
+
+    fun setRecommendedFilterValue(value: Boolean) {
+        recommendedFilterLiveData.value = value
     }
 
     companion object {

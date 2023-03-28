@@ -46,6 +46,7 @@ class FavouriteFragment : Fragment() {
             startActivity(
                 Intent(activity, RestaurantActivity::class.java)
                     .putExtra("restaurant_id", restaurantShort.id)
+                    .putExtra("restaurant_name", restaurantShort.name)
                     .putExtra("is_favourite", restaurantShort.favourite)
                     .putExtra("is_marked", restaurantShort.marked)
                     .putExtra("is_recommended", restaurantShort.recommended)

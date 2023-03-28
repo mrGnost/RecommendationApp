@@ -1,5 +1,6 @@
 package com.example.recommendationapp.data.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.example.recommendationapp.data.datastore.db.RestaurantsDao
@@ -102,17 +103,33 @@ class DatabaseRepositoryImpl
         return restaurantsDao.getFilters().map { x -> x.map { it.toEntity() } }
     }
 
+    override fun clearFilters(filters: List<Filter>): Completable {
+        return Completable.fromRunnable {
+            restaurantsDao.updateFilters(filters.map {
+                val filter = FilterDataEntity.fromEntity(it)
+                filter.checked.replaceAll { false }
+                filter
+            })
+        }
+    }
+
     override fun changeCheckedFilter(filter: Filter, value: Boolean, filterId: Int): Completable {
         return Completable.fromRunnable {
-            restaurantsDao.updateFilter(FilterDataEntity.fromEntity(filter).apply {
-                checked[filterId] = value
-            })
+            val newFilter = FilterDataEntity.fromEntity(filter)
+            newFilter.checked[filterId] = value
+            restaurantsDao.updateFilter(newFilter)
         }
     }
 
     override fun getRecommendedCount(): Single<Int> {
         return Single.fromCallable {
             restaurantsDao.getRecommendedCount()
+        }
+    }
+
+    override fun getFiltersCount(): LiveData<Int> {
+        return restaurantsDao.getFilters().map {x ->
+            x.sumOf { y -> y.checked.count { it } }
         }
     }
 

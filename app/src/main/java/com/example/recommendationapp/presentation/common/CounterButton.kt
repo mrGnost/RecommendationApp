@@ -18,6 +18,7 @@ class CounterButton
     private val binding: CounterButtonBinding =
         CounterButtonBinding.inflate(LayoutInflater.from(context), this, false)
     private var checkedVal = false
+    private var btnText = ""
 
     var isChecked: Boolean
         get() = checkedVal
@@ -36,6 +37,13 @@ class CounterButton
             }
         }
 
+    var text: String
+        get() = btnText
+        set(value) {
+            btnText = value
+            binding.buttonText.text = value
+        }
+
     init {
         addView(binding.root)
         val styles = context.obtainStyledAttributes(attributeSet, R.styleable.CounterButton)
@@ -45,7 +53,7 @@ class CounterButton
         val hasIcon = styles.getBoolean(R.styleable.CounterButton_hasIcon, false)
 
         isChecked = checked
-        binding.buttonText.text = text
+        this.text = text.toString()
         setCount(number)
         binding.buttonIcon.visibility = if (hasIcon) View.VISIBLE else View.GONE
 

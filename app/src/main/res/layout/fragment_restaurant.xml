@@ -30,14 +30,14 @@
                 android:fitsSystemWindows="true"
                 />
 
-            <com.google.android.material.appbar.MaterialToolbar
+            <androidx.appcompat.widget.Toolbar
                 android:id="@+id/topAppBar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="Океан"
                 app:menu="@menu/restaurant_top_bar_menu"
                 app:navigationIcon="@drawable/ic_back_circle_24"
                 style="@style/Widget.MaterialComponents.Toolbar.Primary"
+                app:title="Океан"
                 app:layout_scrollFlags="scroll|enterAlways|snap"
                 android:elevation="0dp"
                 android:background="@color/transparent"

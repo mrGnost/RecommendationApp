@@ -2,6 +2,8 @@ package com.example.recommendationapp.presentation.restaurant.view
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -32,9 +34,11 @@ import javax.inject.Inject
 
 class RestaurantActivity : AppCompatActivity() {
     private lateinit var binding: FragmentRestaurantBinding
+    private lateinit var menu: Menu
     private lateinit var viewModel: RestaurantViewModel
     private lateinit var photoAdapter: PhotoAdapter
     private lateinit var similarAdapter: SimilarAdapter
+    private lateinit var restaurant: Restaurant
     private var isMarked = false
     private var isFavourite = false
     private var isRecommended = false
@@ -54,11 +58,34 @@ class RestaurantActivity : AppCompatActivity() {
         (applicationContext as App).appComp().inject(this)
         createViewModel()
         observeLiveData()
+        setSupportActionBar(binding.topAppBar)
 
         viewModel.getRestaurantInfo(intent.getIntExtra("restaurant_id", 1))
 
         binding.topAppBar.setNavigationOnClickListener {
             finish()
+        }
+
+        supportActionBar?.title = intent.getStringExtra("restaurant_name")
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.restaurant_top_bar_menu, menu)
+        this.menu = menu!!
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.like -> {
+                changeLike(restaurant)
+                true
+            }
+            R.id.mark -> {
+                changeMark(restaurant)
+                true
+            }
+            else -> false
         }
     }
 
@@ -81,6 +108,7 @@ class RestaurantActivity : AppCompatActivity() {
 
     private fun showResults(restaurant: Restaurant) {
         Log.d(TAG_ADD, "showResults() called with: restaurant = ${restaurant.name}")
+        this.restaurant = restaurant
 
         isMarked = intent.getBooleanExtra("is_marked", false)
         isFavourite = intent.getBooleanExtra("is_favourite", false)
@@ -89,24 +117,6 @@ class RestaurantActivity : AppCompatActivity() {
         changeMarkDisplay()
         changeLikeDisplay()
 
-        binding.topAppBar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.mark -> {
-                    changeMark(restaurant)
-                    true
-                }
-                R.id.like -> {
-                    changeLike(restaurant)
-                    true
-                }
-                else -> false
-            }
-        }
-
-        supportActionBar?.title = restaurant.name
-        binding.topAppBar.title = restaurant.name
-        Log.d("SUPPORT_BAR", "${supportActionBar?.title}")
-        Log.d("TOP_BAR", "${binding.topAppBar.title}")
         binding.topImage.load(Common.getImageAddress(restaurant.photo)) {
             crossfade(true)
             error(R.drawable.image_broken_24)
@@ -131,7 +141,7 @@ class RestaurantActivity : AppCompatActivity() {
     }
 
     private fun changeMarkDisplay() {
-        binding.topAppBar.menu.getItem(0).icon = ContextCompat.getDrawable(
+        menu.getItem(0).icon = ContextCompat.getDrawable(
             this,
             if (isMarked) R.drawable.ic_bookmark_circle_24
             else R.drawable.ic_bookmark_border_circle_24
@@ -141,7 +151,7 @@ class RestaurantActivity : AppCompatActivity() {
     }
 
     private fun changeLikeDisplay() {
-        binding.topAppBar.menu.getItem(1).icon = ContextCompat.getDrawable(
+        menu.getItem(1).icon = ContextCompat.getDrawable(
             this,
             if (isFavourite) R.drawable.ic_favorite_circle_24
             else R.drawable.ic_favorite_border_circle_24

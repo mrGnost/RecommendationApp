@@ -90,6 +90,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
         binding.recommendationsBtn.setOnClickListener {
             binding.recommendationsBtn.isChecked = !binding.recommendationsBtn.isChecked
+            viewModel.setRecommendedFilterValue(binding.recommendationsBtn.isChecked)
             viewModel.getRestaurantsInArea(
                 binding.recommendationsBtn.isChecked,
                 binding.mapview.map.visibleRegion
@@ -148,6 +149,8 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         viewModel.getRestaurantsLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
         viewModel.getRecommendedCountLiveData().observe(viewLifecycleOwner, this::displayRecommendedCount)
+        viewModel.getFiltersCountLiveData().observe(viewLifecycleOwner, this::displayFiltersCount)
+        viewModel.getRecommendedFilterLiveData().observe(viewLifecycleOwner, this::setRecommendedFilter)
     }
 
     private fun drawRestaurants(restaurants: List<RestaurantShort>) {
@@ -204,6 +207,18 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     private fun displayRecommendedCount(count: Int) {
         binding.recommendationsBtn.setCount(count)
+    }
+
+    private fun displayFiltersCount(count: Int) {
+        binding.filtersBtn.setCount(count)
+    }
+
+    private fun setRecommendedFilter(value: Boolean) {
+        binding.recommendationsBtn.isChecked = value
+        viewModel.getRestaurantsInArea(
+            binding.recommendationsBtn.isChecked,
+            binding.mapview.map.visibleRegion
+        )
     }
 
     private fun setupBottomSheetCall() {
@@ -304,6 +319,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
                 activity?.startActivity(
                     Intent(activity, RestaurantActivity::class.java)
                         .putExtra("restaurant_id", place.id)
+                        .putExtra("restaurant_name", place.name)
                         .putExtra("is_marked", place.marked)
                         .putExtra("is_favourite", place.favourite)
                         .putExtra("is_recommended", place.recommended)

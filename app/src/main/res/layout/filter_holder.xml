@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
     <TextView
         android:id="@+id/name"
@@ -14,5 +15,6 @@
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/filters_group"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:singleSelection="false"/>
 </LinearLayout>

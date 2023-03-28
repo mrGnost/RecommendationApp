@@ -18,6 +18,7 @@ import com.example.recommendationapp.presentation.map.adapter.FiltersAdapter
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModel
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModelFactory
 import com.example.recommendationapp.presentation.splash.view.SplashActivity
+import com.example.recommendationapp.utils.callback.FilterClickListener
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -34,12 +35,20 @@ class MapBottomSheet : BottomSheetDialogFragment() {
     lateinit var behavior: BottomSheetBehavior<FrameLayout>
     private val disposables = CompositeDisposable()
 
+    private lateinit var filters: List<Filter>
+
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
     @Inject
     lateinit var schedulers: SchedulerProvider
+
+    private val chipClickListener = object : FilterClickListener {
+        override fun onClick(filter: Filter, pos: Int, value: Boolean) {
+            viewModel.setFilterChecked(filter, value, pos)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +72,16 @@ class MapBottomSheet : BottomSheetDialogFragment() {
         binding.closeBtn.setOnClickListener {
             behavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
+        binding.cancelBtn.setOnClickListener {
+            viewModel.clearAllFilters(filters)
+            behavior.state = BottomSheetBehavior.STATE_HIDDEN
+        }
+        binding.showBtn.setOnClickListener {
+
+        }
+        binding.recommendationsChip.setOnClickListener {
+            viewModel.setRecommendedFilterValue(binding.recommendationsChip.isChecked)
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -81,11 +100,29 @@ class MapBottomSheet : BottomSheetDialogFragment() {
 
     private fun observeLiveData() {
         viewModel.getFiltersLiveData().observe(viewLifecycleOwner, this::setFilters)
+        viewModel.getFiltersCountLiveData().observe(viewLifecycleOwner, this::setFiltersCount)
+        viewModel.getRecommendedFilterLiveData().observe(viewLifecycleOwner, this::setRecommendedFilter)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
     }
 
     private fun setFilters(filters: List<Filter>) {
+        this.filters = filters
         adapter.setData(filters)
+    }
+
+    private fun setFiltersCount(count: Int) {
+        binding.showBtn.setCount(count)
+        if (count == 0) {
+            binding.cancelBtn.visibility = View.GONE
+            binding.showBtn.text = "Показать места"
+        } else {
+            binding.cancelBtn.visibility = View.VISIBLE
+            binding.showBtn.text = "Показать"
+        }
+    }
+
+    private fun setRecommendedFilter(value: Boolean) {
+        binding.recommendationsChip.isChecked = value
     }
 
     private fun showError(throwable: Throwable) {
@@ -94,7 +131,7 @@ class MapBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun createAdapter() {
-        adapter = FiltersAdapter(emptyList())
+        adapter = FiltersAdapter(emptyList(), chipClickListener)
         binding.recycler.layoutManager = LinearLayoutManager(context)
         binding.recycler.adapter = adapter
     }
@@ -103,6 +140,7 @@ class MapBottomSheet : BottomSheetDialogFragment() {
         super.onDestroy()
         disposables.dispose()
         disposables.clear()
+        Log.d("BOTTOM_SHEET", "destroyed")
     }
 
     companion object {
