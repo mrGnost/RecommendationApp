@@ -2,7 +2,9 @@ package com.example.recommendationapp.data.api
 
 import com.example.recommendationapp.data.model.*
 import io.reactivex.Single
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface RecommendationApi {
@@ -24,4 +26,14 @@ interface RecommendationApi {
     @GET("cafes/{id}/similar/{amount}")
     fun getSimilarPlaces(@Path("id") id: Int, @Path("amount") amount: Int):
             Single<List<RestaurantShortDataEntityResponse>>
+
+    @POST("filtered-cafes")
+    fun getFilteredPlaces(@Body filters: List<FilterDataEntityRequest>):
+            Single<List<Int>>
+
+    @POST("users/{user_id}/recommended-cafes/filtered")
+    fun getFilteredRecommendedPlaces(
+        @Path("user_id") id: Int,
+        @Body filters: List<FilterDataEntityRequest>
+    ): Single<List<Int>>
 }

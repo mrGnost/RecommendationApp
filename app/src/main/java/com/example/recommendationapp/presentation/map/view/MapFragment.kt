@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import coil.load
 import coil.size.Scale
@@ -23,7 +24,9 @@ import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.FragmentMapBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.FilterInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModel
@@ -32,6 +35,7 @@ import com.example.recommendationapp.presentation.restaurant.view.RestaurantActi
 import com.example.recommendationapp.presentation.search.view.SearchActivity
 import com.example.recommendationapp.presentation.splash.view.SplashActivity
 import com.example.recommendationapp.utils.Common
+import com.example.recommendationapp.utils.callback.EmptyClickListener
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -49,15 +53,16 @@ import kotlin.math.pow
 
 class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationListener {
     private lateinit var binding: FragmentMapBinding
-    private lateinit var viewModel: MapViewModel
     private lateinit var mapObjects: MapObjectCollection
     private lateinit var bottomSheet: MapBottomSheet
     private lateinit var locationManager: LocationManager
+    private lateinit var filters: List<Filter>
+    private var filtersCount = 0
     private val disposables = CompositeDisposable()
 
-    private var mapPosition: Point = Point(55.87, 37.7)
-    private var userPosition: Point = Point(55.87, 37.7)
-    private var mapZoom = 16f
+    private var mapPosition: Point = Point(55.75, 37.62)
+    private var userPosition: Point = Point(55.75, 37.62)
+    private var mapZoom = 20f
     private var visiblePlaces: List<RestaurantShort> = listOf()
     private var expandedId: Int? = null
 
@@ -66,12 +71,27 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
     @Inject
+    lateinit var filterInteractor: FilterInteractor
+    @Inject
     lateinit var schedulers: SchedulerProvider
+
+    private val viewModel: MapViewModel by viewModels {
+        MapViewModelFactory(
+            recommendationInteractor, databaseInteractor, filterInteractor, schedulers)
+    }
+
+    private val clickListener = object : EmptyClickListener {
+        override fun onClick() {
+            viewModel.getRecommendedFilter()
+            viewModel.getFiltersLiveData()
+            searchRestaurants()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (activity?.applicationContext as App).appComp().inject(this)
-        bottomSheet = MapBottomSheet.newInstance()
+        bottomSheet = MapBottomSheet.newInstance(clickListener)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -81,31 +101,33 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        createViewModel()
         observeLiveData()
         setupBottomSheetCall()
         setupSearchActivityCall()
         setupMapZoom()
         setupLocationUpdates()
 
+        parentFragmentManager.setFragmentResultListener("location", this) { _, bundle ->
+            mapPosition = Point(bundle.getDouble("latitude"), bundle.getDouble("longitude"))
+            moveMap()
+        }
+
         binding.recommendationsBtn.setOnClickListener {
             binding.recommendationsBtn.isChecked = !binding.recommendationsBtn.isChecked
-            viewModel.setRecommendedFilterValue(binding.recommendationsBtn.isChecked)
-            viewModel.getRestaurantsInArea(
-                binding.recommendationsBtn.isChecked,
-                binding.mapview.map.visibleRegion
-            )
+            viewModel.setRecommendedFilter(binding.recommendationsBtn.isChecked)
+            searchRestaurants()
         }
 
         binding.currentPosFab.setOnClickListener {
             mapPosition = userPosition
+            mapZoom = 20f
             moveMap()
         }
 
         binding.mapview.map.addCameraListener(this)
         mapObjects = binding.mapview.map.mapObjects
         viewModel.getRecommendedCount()
-        moveMap()
+        viewModel.getFiltersLiveData()
     }
 
     @SuppressLint("MissingPermission")
@@ -138,22 +160,18 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         return bitmap
     }
 
-    private fun createViewModel() {
-        viewModel = ViewModelProvider(
-            this, MapViewModelFactory(
-                recommendationInteractor, databaseInteractor, schedulers)
-        )[MapViewModel::class.java]
-    }
-
     private fun observeLiveData() {
         viewModel.getRestaurantsLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
         viewModel.getRecommendedCountLiveData().observe(viewLifecycleOwner, this::displayRecommendedCount)
         viewModel.getFiltersCountLiveData().observe(viewLifecycleOwner, this::displayFiltersCount)
         viewModel.getRecommendedFilterLiveData().observe(viewLifecycleOwner, this::setRecommendedFilter)
+        viewModel.getFilteredLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
+        viewModel.getFiltersLiveData().observe(viewLifecycleOwner, this::setFilters)
     }
 
     private fun drawRestaurants(restaurants: List<RestaurantShort>) {
+        Log.d("FILTERED", restaurants.map { it.name }.toString())
         visiblePlaces = restaurants
         mapObjects.clear()
         for (place in restaurants) {
@@ -211,10 +229,22 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     private fun displayFiltersCount(count: Int) {
         binding.filtersBtn.setCount(count)
+        filtersCount = count
     }
 
     private fun setRecommendedFilter(value: Boolean) {
         binding.recommendationsBtn.isChecked = value
+        viewModel.getRestaurantsInArea(
+            binding.recommendationsBtn.isChecked,
+            binding.mapview.map.visibleRegion
+        )
+    }
+
+    private fun setFilters(filters: List<Filter>) {
+        this.filters = filters
+    }
+
+    private fun searchRestaurants() {
         viewModel.getRestaurantsInArea(
             binding.recommendationsBtn.isChecked,
             binding.mapview.map.visibleRegion
@@ -276,10 +306,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
             Animation(Animation.Type.SMOOTH, .2f),
             null
         )
-        viewModel.getRestaurantsInArea(
-            binding.recommendationsBtn.isChecked,
-            binding.mapview.map.visibleRegion
-        )
+        searchRestaurants()
     }
 
     override fun onCameraPositionChanged(
@@ -289,12 +316,12 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         finished: Boolean
     ) {
         if (finished) {
+            Log.d("NEW_POSITION", "${cameraPosition.target.latitude}; " +
+                    "${cameraPosition.target.longitude}")
             expandedId = null
             mapPosition = binding.mapview.map.cameraPosition.target
-            viewModel.getRestaurantsInArea(
-                binding.recommendationsBtn.isChecked,
-                binding.mapview.map.visibleRegion
-            )
+            mapZoom = binding.mapview.map.cameraPosition.zoom
+            searchRestaurants()
         }
     }
 

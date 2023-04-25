@@ -62,10 +62,10 @@ class SearchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             scale(Scale.FIT)
         }
         itemView.setOnClickListener {
-            holderClickListener.onClick(restaurant)
+            holderClickListener.onClick(restaurant, adapterPosition)
         }
         mark.setOnClickListener {
-            markClickListener.onClick(restaurant)
+            markClickListener.onClick(restaurant, adapterPosition)
         }
     }
 }

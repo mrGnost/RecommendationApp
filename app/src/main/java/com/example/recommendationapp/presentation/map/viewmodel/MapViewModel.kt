@@ -1,10 +1,12 @@
 package com.example.recommendationapp.presentation.map.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.example.recommendationapp.App
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.FilterInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.Location
@@ -17,6 +19,7 @@ import io.reactivex.schedulers.Schedulers
 class MapViewModel(
     private val recommendationInteractor: RecommendationInteractor,
     private val databaseInteractor: DatabaseInteractor,
+    private val filterInteractor: FilterInteractor,
     private val schedulers: SchedulerProvider
 ) : ViewModel() {
     private val progressLiveData = MutableLiveData<Boolean>()
@@ -24,6 +27,7 @@ class MapViewModel(
     private val restaurantsLiveData = MutableLiveData<List<RestaurantShort>>()
     private val recommendedCountLiveData = MutableLiveData<Int>()
     private val recommendedFilterLiveData = MutableLiveData<Boolean>()
+    private val filteredRestaurantsLiveData = MutableLiveData<List<RestaurantShort>>()
     private val disposables = CompositeDisposable()
 
     fun getRestaurantsInArea(recommended: Boolean, area: VisibleRegion) {
@@ -90,6 +94,66 @@ class MapViewModel(
         )
     }
 
+    fun setRecommendedFilter(value: Boolean) {
+        disposables.add(filterInteractor.setRecommendationFilter(value)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(
+                { Log.d(FILTER, "recommended filter = $value") },
+                errorLiveData::setValue
+            )
+        )
+    }
+
+    fun getRecommendedFilter() {
+        disposables.add(filterInteractor.getRecommendationFilter()
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(
+                recommendedFilterLiveData::setValue,
+                errorLiveData::setValue
+            )
+        )
+    }
+
+    fun getFilteredRestaurants(userId: Int, filters: List<Filter>, recommended: Boolean) {
+        disposables.add(recommendationInteractor.getFilteredPlaces(userId, filters, recommended)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(
+                this::getRestaurantsByIds,
+                errorLiveData::setValue
+            )
+        )
+    }
+
+    private fun getRestaurantsByIds(ids: List<Int>) {
+        disposables.add(databaseInteractor.getRestaurantsByIds(ids)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(
+                filteredRestaurantsLiveData::setValue,
+                errorLiveData::setValue
+            )
+        )
+    }
+
     fun getErrorLiveData(): LiveData<Throwable> {
         return errorLiveData
     }
@@ -118,12 +182,13 @@ class MapViewModel(
         return recommendedFilterLiveData
     }
 
-    fun setRecommendedFilterValue(value: Boolean) {
-        recommendedFilterLiveData.value = value
+    fun getFilteredLiveData(): LiveData<List<RestaurantShort>> {
+        return filteredRestaurantsLiveData
     }
 
     companion object {
         private const val RETROFIT = "RETROFIT"
         private const val DB = "DATABASE_CUSTOM"
+        private const val FILTER = "FILTER_SOURCE"
     }
 }

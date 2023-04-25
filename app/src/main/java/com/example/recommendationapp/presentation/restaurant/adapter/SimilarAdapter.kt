@@ -45,7 +45,7 @@ class SimilarViewHolder(itemView: View) : ViewHolder(itemView) {
             scale(Scale.FIT)
         }
         itemView.setOnClickListener {
-            clickListener.onClick(place)
+            clickListener.onClick(place, adapterPosition)
         }
     }
 }

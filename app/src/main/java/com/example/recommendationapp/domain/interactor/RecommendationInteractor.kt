@@ -32,4 +32,10 @@ class RecommendationInteractor
     fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>> {
         return recommendationRepository.getSimilar(placeId, amount)
     }
+
+    fun getFilteredPlaces(
+        userId: Int,
+        filters: List<Filter>,
+        recommended: Boolean
+    ) = recommendationRepository.getFilteredPlaces(userId, filters, recommended)
 }

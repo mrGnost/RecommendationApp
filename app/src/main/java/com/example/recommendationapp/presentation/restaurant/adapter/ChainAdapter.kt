@@ -35,5 +35,9 @@ class ChainViewHolder(itemView: View) : ViewHolder(itemView) {
         placeName.text = place.name
         placeTags.text = place.categories
         placeAddress.text = place.address
+
+        itemView.setOnClickListener {
+            clickListener.onClick(place, adapterPosition)
+        }
     }
 }

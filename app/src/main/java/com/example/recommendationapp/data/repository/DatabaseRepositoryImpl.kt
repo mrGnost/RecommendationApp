@@ -87,6 +87,12 @@ class DatabaseRepositoryImpl
         return restaurantsDao.getMarkedRestaurants().map { x -> x.map { it.toEntity() } }
     }
 
+    override fun getRestaurantsByIds(ids: List<Int>): Single<List<RestaurantShort>> {
+        return Single.fromCallable {
+            restaurantsDao.getRestaurantsByIds(ids).map { it.toEntity() }
+        }
+    }
+
     override fun findRestaurants(prefix: String): Single<List<RestaurantShort>> {
         return Single.fromCallable {
             restaurantsDao.findRestaurants(prefix).map { it.toEntity() }

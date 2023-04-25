@@ -17,6 +17,7 @@ import javax.inject.Singleton
     modules = [
         RetrofitModule::class,
         RoomModule::class,
+        FilterModule::class,
         BindModule::class
     ]
 )

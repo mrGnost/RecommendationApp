@@ -1,6 +1,7 @@
 package com.example.recommendationapp.data.repository
 
 import com.example.recommendationapp.data.api.RecommendationApi
+import com.example.recommendationapp.data.model.FilterDataEntityRequest
 import com.example.recommendationapp.domain.model.AllRestaurantsResponse
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.Restaurant
@@ -33,5 +34,20 @@ class RecommendationRepositoryImpl
 
     override fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>> {
         return api.getSimilarPlaces(placeId, amount).map { x -> x.map { it.toEntity() } }
+    }
+
+    override fun getFilteredPlaces(
+        userId: Int,
+        filters: List<Filter>,
+        recommended: Boolean
+    ): Single<List<Int>> {
+        return if (recommended)
+            api.getFilteredRecommendedPlaces(userId, filters.map {
+                FilterDataEntityRequest.fromEntity(it)
+            })
+        else
+            api.getFilteredPlaces(filters.map {
+                FilterDataEntityRequest.fromEntity(it)
+            })
     }
 }

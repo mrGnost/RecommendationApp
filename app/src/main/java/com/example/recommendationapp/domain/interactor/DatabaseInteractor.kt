@@ -35,6 +35,8 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
         rightLon: Double
     ) = databaseRepository.getInArea(recommended, leftLat, leftLon, rightLat, rightLon)
 
+    fun getRestaurantsByIds(ids: List<Int>) = databaseRepository.getRestaurantsByIds(ids)
+
     fun getRestaurants(favourite: Boolean) =
         databaseRepository.getRestaurants(favourite)
 

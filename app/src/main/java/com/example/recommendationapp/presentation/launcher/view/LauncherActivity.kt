@@ -84,9 +84,15 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     private fun goToMap() {
+        val bundle = Bundle()
+        val latitude = intent.getDoubleExtra("latitude", 55.75)
+        val longitude = intent.getDoubleExtra("longitude", 37.62)
+        bundle.putDouble("latitude", latitude)
+        bundle.putDouble("longitude", longitude)
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_container, MapFragment.newInstance(), MapFragment.TAG)
             .commit()
+        supportFragmentManager.setFragmentResult("location", bundle)
     }
 }

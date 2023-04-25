@@ -19,6 +19,7 @@ import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
+import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.restaurant.adapter.ChainAdapter
 import com.example.recommendationapp.presentation.restaurant.adapter.PhotoAdapter
 import com.example.recommendationapp.presentation.restaurant.adapter.SimilarAdapter
@@ -53,7 +54,7 @@ class RestaurantActivity : AppCompatActivity() {
     lateinit var schedulers: SchedulerProvider
 
     private val clickListener = object : RestaurantClickListener {
-        override fun onClick(restaurantShort: RestaurantShort) {
+        override fun onClick(restaurantShort: RestaurantShort, position: Int) {
             startActivity(
                 Intent(this@RestaurantActivity, RestaurantActivity::class.java)
                     .putExtra("restaurant_id", restaurantShort.id)
@@ -142,6 +143,11 @@ class RestaurantActivity : AppCompatActivity() {
             scale(Scale.FIT)
         }
         binding.contentRestaurant.address.text = restaurant.address
+        binding.contentRestaurant.mapBtn.setOnClickListener {
+            startActivity(Intent(this, LauncherActivity::class.java)
+                .putExtra("latitude", restaurant.location.latitude)
+                .putExtra("longitude", restaurant.location.longitude))
+        }
         binding.contentRestaurant.workHours.text = restaurant.workingHours
         binding.contentRestaurant.recommendBtn.setOnClickListener {
             changeMark(restaurant)

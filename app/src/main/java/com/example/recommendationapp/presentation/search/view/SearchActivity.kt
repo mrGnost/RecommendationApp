@@ -46,7 +46,7 @@ class SearchActivity : AppCompatActivity() {
     lateinit var schedulers: SchedulerProvider
 
     private var holderClickListener = object : RestaurantClickListener {
-        override fun onClick(restaurantShort: RestaurantShort) {
+        override fun onClick(restaurantShort: RestaurantShort, position: Int) {
             startActivity(
                 Intent(this@SearchActivity, RestaurantActivity::class.java)
                     .putExtra("restaurant_id", restaurantShort.id)
@@ -59,7 +59,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private var markClickListener = object : RestaurantClickListener {
-        override fun onClick(restaurantShort: RestaurantShort) {
+        override fun onClick(restaurantShort: RestaurantShort, position: Int) {
             viewModel.changeLike(restaurantShort, !restaurantShort.favourite)
             val text = binding.searchEditText.text?.trim()
             if (text != null && text.isNotBlank())

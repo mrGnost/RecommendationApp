@@ -7,17 +7,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recommendationapp.App
 import com.example.recommendationapp.databinding.BottomSheetMapBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.FilterInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.presentation.map.adapter.FiltersAdapter
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModel
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModelFactory
 import com.example.recommendationapp.presentation.splash.view.SplashActivity
+import com.example.recommendationapp.utils.callback.EmptyClickListener
 import com.example.recommendationapp.utils.callback.FilterClickListener
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -28,8 +31,7 @@ import com.google.android.material.snackbar.Snackbar
 import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 
-class MapBottomSheet : BottomSheetDialogFragment() {
-    private lateinit var viewModel: MapViewModel
+class MapBottomSheet(private val clickListener: EmptyClickListener) : BottomSheetDialogFragment() {
     private lateinit var adapter: FiltersAdapter
     lateinit var binding: BottomSheetMapBinding
     lateinit var behavior: BottomSheetBehavior<FrameLayout>
@@ -42,7 +44,14 @@ class MapBottomSheet : BottomSheetDialogFragment() {
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
     @Inject
+    lateinit var filterInteractor: FilterInteractor
+    @Inject
     lateinit var schedulers: SchedulerProvider
+
+    private val viewModel: MapViewModel by viewModels {
+        MapViewModelFactory(
+            recommendationInteractor, databaseInteractor, filterInteractor, schedulers)
+    }
 
     private val chipClickListener = object : FilterClickListener {
         override fun onClick(filter: Filter, pos: Int, value: Boolean) {
@@ -66,9 +75,9 @@ class MapBottomSheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        createViewModel()
         observeLiveData()
         createAdapter()
+        viewModel.getRecommendedFilter()
         binding.closeBtn.setOnClickListener {
             behavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
@@ -77,10 +86,10 @@ class MapBottomSheet : BottomSheetDialogFragment() {
             behavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
         binding.showBtn.setOnClickListener {
-
+            behavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
         binding.recommendationsChip.setOnClickListener {
-            viewModel.setRecommendedFilterValue(binding.recommendationsChip.isChecked)
+            viewModel.setRecommendedFilter(binding.recommendationsChip.isChecked)
         }
     }
 
@@ -89,13 +98,6 @@ class MapBottomSheet : BottomSheetDialogFragment() {
         behavior = (dialog as BottomSheetDialog).behavior
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
         return dialog
-    }
-
-    private fun createViewModel() {
-        viewModel = ViewModelProvider(
-            this, MapViewModelFactory(
-                recommendationInteractor, databaseInteractor, schedulers)
-        )[MapViewModel::class.java]
     }
 
     private fun observeLiveData() {
@@ -138,6 +140,7 @@ class MapBottomSheet : BottomSheetDialogFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        clickListener.onClick()
         disposables.dispose()
         disposables.clear()
         Log.d("BOTTOM_SHEET", "destroyed")
@@ -149,8 +152,8 @@ class MapBottomSheet : BottomSheetDialogFragment() {
         private const val TAG_ERROR = "${MapFragment.TAG} ERROR"
         private const val TAG_PROGRESS = "${MapFragment.TAG} PROGRESS"
 
-        fun newInstance(): MapBottomSheet {
-            return MapBottomSheet()
+        fun newInstance(clickListener: EmptyClickListener): MapBottomSheet {
+            return MapBottomSheet(clickListener)
         }
     }
 }

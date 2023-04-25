@@ -34,6 +34,8 @@ class FavouriteFragment : Fragment() {
     private var markData = listOf<RestaurantShort>()
     private val disposables = CompositeDisposable()
 
+    private var removedPosition = -1
+
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
@@ -42,7 +44,7 @@ class FavouriteFragment : Fragment() {
     lateinit var schedulers: SchedulerProvider
 
     private var holderClickListener = object : RestaurantClickListener {
-        override fun onClick(restaurantShort: RestaurantShort) {
+        override fun onClick(restaurantShort: RestaurantShort, position: Int) {
             startActivity(
                 Intent(activity, RestaurantActivity::class.java)
                     .putExtra("restaurant_id", restaurantShort.id)
@@ -55,12 +57,13 @@ class FavouriteFragment : Fragment() {
     }
 
     private var markClickListener = object : RestaurantClickListener {
-        override fun onClick(restaurantShort: RestaurantShort) {
+        override fun onClick(restaurantShort: RestaurantShort, position: Int) {
             if (binding.favSwitch.isFavourite) {
                 viewModel.clearLike(restaurantShort)
             } else {
                 viewModel.clearMark(restaurantShort)
             }
+            removedPosition = position
         }
     }
 
@@ -100,7 +103,10 @@ class FavouriteFragment : Fragment() {
 
     private fun updateLikes(restaurants: List<RestaurantShort>) {
         if (binding.favSwitch.isFavourite) {
-            adapter.setData(restaurants, true)
+            if (removedPosition == -1)
+                adapter.setData(restaurants, true)
+            else
+                adapter.removeItem(restaurants, removedPosition)
         }
         favData = restaurants
         Log.d("UPDATED_LIKES", "$favData")
@@ -108,7 +114,10 @@ class FavouriteFragment : Fragment() {
 
     private fun updateMarks(restaurants: List<RestaurantShort>) {
         if (!binding.favSwitch.isFavourite) {
-            adapter.setData(restaurants, false)
+            if (removedPosition == -1)
+                adapter.setData(restaurants, false)
+            else
+                adapter.removeItem(restaurants, removedPosition)
         }
         markData = restaurants
         Log.d("UPDATED_MARKS", "$markData")

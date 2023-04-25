@@ -1,5 +1,6 @@
 package com.example.recommendationapp.presentation.favourite.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import coil.load
 import coil.size.Scale
 import com.example.recommendationapp.R
 import com.example.recommendationapp.domain.model.RestaurantShort
+import com.example.recommendationapp.utils.Common
 import com.example.recommendationapp.utils.Common.getPlaceImageAddress
 import com.example.recommendationapp.utils.callback.RestaurantClickListener
 
@@ -37,6 +39,11 @@ class FavouriteAdapter(
         this.favourite = favourite
         notifyDataSetChanged()
     }
+
+    fun removeItem(newData: List<RestaurantShort>, position: Int) {
+        restaurants = newData
+        notifyItemRemoved(position)
+    }
 }
 
 class FavouriteViewHolder(itemView: View) : ViewHolder(itemView) {
@@ -52,6 +59,10 @@ class FavouriteViewHolder(itemView: View) : ViewHolder(itemView) {
         holderClickListener: RestaurantClickListener,
         markClickListener: RestaurantClickListener
     ) {
+        if (Common.restaurantHolderHeight != 0) {
+            itemView.layoutParams.height = Common.restaurantHolderHeight
+            itemView.alpha = 1f
+        }
         placeName.text = restaurant.name
         tags.text = restaurant.categories
         address.text = restaurant.address
@@ -68,10 +79,11 @@ class FavouriteViewHolder(itemView: View) : ViewHolder(itemView) {
             scale(Scale.FIT)
         }
         itemView.setOnClickListener {
-            holderClickListener.onClick(restaurant)
+            holderClickListener.onClick(restaurant, adapterPosition)
         }
         mark.setOnClickListener {
-            markClickListener.onClick(restaurant)
+            Log.d("ITEM_POSITION", adapterPosition.toString())
+            markClickListener.onClick(restaurant, adapterPosition)
         }
     }
 }
