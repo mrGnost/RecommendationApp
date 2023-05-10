@@ -1,6 +1,9 @@
 package com.example.recommendationapp.di
 
 import android.content.Context
+import com.example.recommendationapp.presentation.auth.view.AuthFragment
+import com.example.recommendationapp.presentation.auth.view.LoginFragment
+import com.example.recommendationapp.presentation.auth.view.RegisterFragment
 import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.favourite.view.FavouriteFragment
 import com.example.recommendationapp.presentation.map.view.MapBottomSheet
@@ -29,6 +32,9 @@ interface AppComponent {
     fun inject(fragment: MapFragment)
     fun inject(fragment: MapBottomSheet)
     fun inject(fragment: FavouriteFragment)
+    fun inject(fragment: AuthFragment)
+    fun inject(fragment: LoginFragment)
+    fun inject(fragment: RegisterFragment)
 
 
     @Component.Builder

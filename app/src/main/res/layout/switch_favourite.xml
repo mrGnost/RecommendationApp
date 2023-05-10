@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="10dp"
-    android:background="@drawable/rounded_orange_holder">
+    android:background="@drawable/rounded_orange_holder_circle">
     <com.google.android.material.chip.Chip
         android:id="@+id/fav_chip"
         android:layout_width="0dp"

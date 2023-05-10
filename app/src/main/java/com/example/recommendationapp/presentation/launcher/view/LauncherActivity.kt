@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat
 import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.ActivityMainBinding
+import com.example.recommendationapp.presentation.auth.view.AuthFragment
 import com.example.recommendationapp.presentation.favourite.view.FavouriteFragment
 import com.example.recommendationapp.presentation.map.view.MapFragment
 import com.example.recommendationapp.utils.Common.LOCATION_PERMISSION_REQUEST_CODE
@@ -36,6 +37,13 @@ class LauncherActivity : AppCompatActivity() {
                     supportFragmentManager
                         .beginTransaction()
                         .replace(R.id.fragment_container, FavouriteFragment.newInstance(), FavouriteFragment.TAG)
+                        .commit()
+                    return@setOnItemSelectedListener true
+                }
+                R.id.profile_nav_item -> {
+                    supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, AuthFragment.newInstance(), AuthFragment.TAG)
                         .commit()
                     return@setOnItemSelectedListener true
                 }
