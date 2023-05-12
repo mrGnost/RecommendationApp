@@ -8,7 +8,7 @@ import com.example.recommendationapp.data.model.RestaurantShortDataEntity
 import com.example.recommendationapp.data.model.SocialDataEntity
 
 @Database(
-    entities = [RestaurantDataEntity::class, RestaurantShortDataEntity::class, FilterDataEntity::class],
+    entities = [RestaurantShortDataEntity::class, FilterDataEntity::class],
     version = DatabaseScheme.DB_VERSION,
     exportSchema = true
 )

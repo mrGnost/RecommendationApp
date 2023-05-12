@@ -97,8 +97,18 @@ class FavouriteFragment : Fragment() {
 
     private fun observeLiveData() {
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
-        viewModel.getRestaurantsLiveData(true).observe(viewLifecycleOwner, this::updateLikes)
-        viewModel.getRestaurantsLiveData(false).observe(viewLifecycleOwner, this::updateMarks)
+        viewModel.getRestaurantIdsLiveData(true).observe(viewLifecycleOwner, this::putLikeIds)
+        viewModel.getRestaurantIdsLiveData(false).observe(viewLifecycleOwner, this::putMarkIds)
+        viewModel.getFavouriteLiveData().observe(viewLifecycleOwner, this::updateLikes)
+        viewModel.getMarkedLiveData().observe(viewLifecycleOwner, this::updateMarks)
+    }
+
+    private fun putLikeIds(restaurantIds: List<Int>) {
+        viewModel.getFavouritesByIds(restaurantIds)
+    }
+
+    private fun putMarkIds(restaurantIds: List<Int>) {
+        viewModel.getMarkedByIds(restaurantIds)
     }
 
     private fun updateLikes(restaurants: List<RestaurantShort>) {

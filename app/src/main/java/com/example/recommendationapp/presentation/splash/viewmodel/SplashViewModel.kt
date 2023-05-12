@@ -5,7 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Account
 import com.example.recommendationapp.domain.model.AllRestaurantsResponse
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.RestaurantShort
@@ -16,6 +18,7 @@ import io.reactivex.schedulers.Schedulers
 class SplashViewModel(
     private val recommendationInteractor: RecommendationInteractor,
     private val databaseInteractor: DatabaseInteractor,
+    private val localInteractor: LocalInteractor,
     private val schedulers: SchedulerProvider
 ) : ViewModel() {
     private val progressLiveData = MutableLiveData<Boolean>()
@@ -24,6 +27,8 @@ class SplashViewModel(
     private val recommendationsCompleteLiveData = MutableLiveData<Boolean>()
     private val favouritesCompleteLiveData = MutableLiveData<Boolean>()
     private val filtersCompleteLiveData = MutableLiveData<Boolean>()
+    private val onboardingFinishedLiveData = MutableLiveData<Boolean>()
+    private val accountLiveData = MutableLiveData<Account>()
     private val disposables = CompositeDisposable()
 
     fun cacheAllRestaurants() {
@@ -50,6 +55,30 @@ class SplashViewModel(
         )
     }
 
+    private fun getOnboardingFinished() {
+        disposables.add(localInteractor.checkOnboardingViewed()
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(onboardingFinishedLiveData::setValue, errorLiveData::setValue)
+        )
+    }
+
+    private fun getAccount() {
+        disposables.add(localInteractor.getAccount()
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(accountLiveData::setValue, errorLiveData::setValue)
+        )
+    }
+
     fun getRecommendations(userId: Int) {
         disposables.add(recommendationInteractor.getRecommended(userId)
             .observeOn(Schedulers.io())
@@ -63,7 +92,7 @@ class SplashViewModel(
     }
 
     private fun putRecommendationsToDb(restaurants: List<RestaurantShort>) {
-        disposables.add(databaseInteractor.makeRecommended(restaurants)
+        disposables.add(databaseInteractor.makeRecommended(restaurants.map { it.id })
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -87,7 +116,7 @@ class SplashViewModel(
     }
 
     private fun putFavouritesToDb(restaurants: List<RestaurantShort>) {
-        disposables.add(databaseInteractor.makeFavourite(restaurants)
+        disposables.add(databaseInteractor.makeFavourite(restaurants.map { it.id })
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -138,6 +167,14 @@ class SplashViewModel(
 
     fun getCompleteLiveData(): LiveData<Boolean> {
         return completeLiveData
+    }
+
+    fun getOnboardingFinishedLiveData(): LiveData<Boolean> {
+        return onboardingFinishedLiveData
+    }
+
+    fun getAccountLiveData(): LiveData<Account> {
+        return accountLiveData
     }
 
     fun getRecommendationsCompleteLiveData(): LiveData<Boolean> {

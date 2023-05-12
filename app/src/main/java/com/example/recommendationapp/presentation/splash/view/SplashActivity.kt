@@ -9,8 +9,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.recommendationapp.App
 import com.example.recommendationapp.databinding.ActivitySplashBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Account
 import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
+import com.example.recommendationapp.presentation.onboarding.WelcomeActivity
 import com.example.recommendationapp.presentation.splash.viewmodel.SplashViewModel
 import com.example.recommendationapp.presentation.splash.viewmodel.SplashViewModelFactory
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
@@ -29,6 +32,8 @@ class SplashActivity : AppCompatActivity() {
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
     @Inject
+    lateinit var localInteractor: LocalInteractor
+    @Inject
     lateinit var schedulers: SchedulerProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +50,9 @@ class SplashActivity : AppCompatActivity() {
     private fun createViewModel() {
         viewModel = ViewModelProvider(
             this,
-            SplashViewModelFactory(recommendationInteractor, databaseInteractor, schedulers)
+            SplashViewModelFactory(
+                recommendationInteractor, databaseInteractor, localInteractor, schedulers
+            )
         )[SplashViewModel::class.java]
     }
 
@@ -53,6 +60,8 @@ class SplashActivity : AppCompatActivity() {
         viewModel.getProgressLiveData().observe(this, this::showProgress)
         viewModel.getCompleteLiveData().observe(this, this::cacheComplete)
         viewModel.getErrorLiveData().observe(this, this::showError)
+        viewModel.getOnboardingFinishedLiveData().observe(this, this::onboardingChecked)
+        viewModel.getAccountLiveData().observe(this, this::accountFound)
         viewModel.getRecommendationsCompleteLiveData().observe(this, this::recommendedSet)
         viewModel.getFavouritesCompleteLiveData().observe(this, this::favouriteSet)
         viewModel.getFiltersCompleteLiveData().observe(this, this::filtersSet)
@@ -65,8 +74,27 @@ class SplashActivity : AppCompatActivity() {
 
     private fun cacheComplete(isComplete: Boolean) {
         Log.d(TAG_ADD, "cache loaded: $isComplete")
-        if (isComplete)
+        if (isComplete) {
+            viewModel.getFilters()
+        }
+    }
+
+    private fun onboardingChecked(finished: Boolean) {
+        if (finished) {
+            viewModel.getAccountLiveData()
+        } else {
+            startActivity(Intent(this, WelcomeActivity::class.java))
+            finish()
+        }
+    }
+
+    private fun accountFound(account: Account) {
+        if (account.email == "") {
+            startActivity(Intent(this, LauncherActivity::class.java))
+            finish()
+        } else {
             viewModel.getRecommendations(1)
+        }
     }
 
     private fun recommendedSet(isComplete: Boolean) {
@@ -77,15 +105,16 @@ class SplashActivity : AppCompatActivity() {
 
     private fun favouriteSet(isComplete: Boolean) {
         Log.d(TAG_ADD, "favourite loaded: $isComplete")
-        if (isComplete)
-            viewModel.getFilters()
+        if (isComplete) {
+            startActivity(Intent(this, LauncherActivity::class.java))
+            finish()
+        }
     }
 
     private fun filtersSet(isComplete: Boolean) {
         Log.d(TAG_ADD, "filters loaded: $isComplete")
         if (isComplete) {
-            startActivity(Intent(this, LauncherActivity::class.java))
-            finish()
+            viewModel.getOnboardingFinishedLiveData()
         }
     }
 

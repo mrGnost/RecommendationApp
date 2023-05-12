@@ -8,20 +8,19 @@ import io.reactivex.Completable
 import io.reactivex.Single
 
 interface DatabaseRepository {
-    fun putRestaurants(restaurants: List<Restaurant>): Completable
 
     fun putRestaurantsShort(restaurants: List<RestaurantShort>): Completable
 
-    fun makeRecommended(restaurants: List<RestaurantShort>): Completable
+    fun makeRecommended(ids: List<Int>): Completable
 
-    fun makeFavourite(restaurants: List<RestaurantShort>): Completable
+    fun makeFavourite(ids: List<Int>): Completable
 
-    fun setLike(restaurant: RestaurantShort, check: Boolean): Completable
+    fun setLike(id: Int, check: Boolean): Completable
 
-    fun setMark(restaurant: RestaurantShort, check: Boolean): Completable
+    fun setMark(id: Int, check: Boolean): Completable
 
     fun getInArea(
-        recommended: Boolean,
+        recommendedIds: List<Int>,
         leftLat: Double,
         leftLon: Double,
         rightLat: Double,
@@ -30,7 +29,7 @@ interface DatabaseRepository {
 
     fun getRestaurantsByIds(ids: List<Int>): Single<List<RestaurantShort>>
 
-    fun getRestaurants(favourite: Boolean): LiveData<List<RestaurantShort>>
+    fun getRestaurantIds(favourite: Boolean): LiveData<List<Int>>
 
     fun findRestaurants(prefix: String): Single<List<RestaurantShort>>
 
@@ -45,8 +44,4 @@ interface DatabaseRepository {
     fun getRecommendedCount(): Single<Int>
 
     fun getFiltersCount(): LiveData<Int>
-
-    fun changeFavourite(id: Int, favourite: Boolean): Completable
-
-    fun changeMark(id: Int, marked: Boolean): Completable
 }

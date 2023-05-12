@@ -1,44 +1,38 @@
 package com.example.recommendationapp.domain.interactor
 
-import androidx.lifecycle.LiveData
 import com.example.recommendationapp.domain.model.Filter
-import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.domain.repository.DatabaseRepository
-import io.reactivex.Single
 import javax.inject.Inject
 
 class DatabaseInteractor @Inject constructor(private val databaseRepository: DatabaseRepository) {
-    fun putRestaurants(restaurants: List<Restaurant>) =
-        databaseRepository.putRestaurants(restaurants)
-
     fun putRestaurantsShort(restaurants: List<RestaurantShort>) =
         databaseRepository.putRestaurantsShort(restaurants)
 
-    fun makeRecommended(restaurants: List<RestaurantShort>) =
-        databaseRepository.makeRecommended(restaurants)
+    fun makeRecommended(restaurantIds: List<Int>) =
+        databaseRepository.makeRecommended(restaurantIds)
 
-    fun makeFavourite(restaurants: List<RestaurantShort>) =
-        databaseRepository.makeFavourite(restaurants)
+    fun makeFavourite(restaurantIds: List<Int>) =
+        databaseRepository.makeFavourite(restaurantIds)
 
-    fun setLike(restaurant: RestaurantShort, value: Boolean) =
-        databaseRepository.setLike(restaurant, value)
+    fun setLike(restaurantId: Int, value: Boolean) =
+        databaseRepository.setLike(restaurantId, value)
 
-    fun setMark(restaurant: RestaurantShort, value: Boolean) =
-        databaseRepository.setMark(restaurant, value)
+    fun setMark(restaurantId: Int, value: Boolean) =
+        databaseRepository.setMark(restaurantId, value)
 
     fun getRestaurantsInArea(
-        recommended: Boolean,
+        recommendedIds: List<Int>,
         leftLat: Double,
         leftLon: Double,
         rightLat: Double,
         rightLon: Double
-    ) = databaseRepository.getInArea(recommended, leftLat, leftLon, rightLat, rightLon)
+    ) = databaseRepository.getInArea(recommendedIds, leftLat, leftLon, rightLat, rightLon)
 
     fun getRestaurantsByIds(ids: List<Int>) = databaseRepository.getRestaurantsByIds(ids)
 
-    fun getRestaurants(favourite: Boolean) =
-        databaseRepository.getRestaurants(favourite)
+    fun getRestaurantIds(favourite: Boolean) =
+        databaseRepository.getRestaurantIds(favourite)
 
     fun findRestaurants(prefix: String) =
         databaseRepository.findRestaurants(prefix)
@@ -56,10 +50,4 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
 
     fun setFilterChecked(filter: Filter, checked: Boolean, filterId: Int) =
         databaseRepository.changeCheckedFilter(filter, checked, filterId)
-
-    fun changeFavourite(id: Int, favourite: Boolean) =
-        databaseRepository.changeFavourite(id, favourite)
-
-    fun changeMarked(id: Int, marked: Boolean) =
-        databaseRepository.changeMark(id, marked)
 }

@@ -1,5 +1,6 @@
-package com.example.recommendationapp.presentation.search.adapter
+package com.example.recommendationapp.presentation.onboarding.search.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +16,6 @@ import com.example.recommendationapp.utils.callback.RestaurantClickListener
 
 class SearchAdapter(
     private var restaurants: List<RestaurantShort>,
-    private var favouriteIds: List<Int>,
     private var holderClickListener: RestaurantClickListener,
     private var markClickListener: RestaurantClickListener
 ) : RecyclerView.Adapter<SearchViewHolder>() {
@@ -27,7 +27,7 @@ class SearchAdapter(
     override fun getItemCount(): Int = restaurants.size
 
     override fun onBindViewHolder(holder: SearchViewHolder, position: Int) {
-        holder.bind(restaurants[position], favouriteIds, holderClickListener, markClickListener)
+        holder.bind(restaurants[position], holderClickListener, markClickListener)
     }
 
     fun setData(newData: List<RestaurantShort>) {
@@ -35,9 +35,9 @@ class SearchAdapter(
         notifyDataSetChanged()
     }
 
-    fun setFavourites(newData: List<Int>) {
-        favouriteIds = newData
-        notifyDataSetChanged()
+    fun removeItem(newData: List<RestaurantShort>, position: Int) {
+        restaurants = newData
+        notifyItemRemoved(position)
     }
 }
 
@@ -50,17 +50,17 @@ class SearchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bind(
         restaurant: RestaurantShort,
-        favouriteIds: List<Int>,
         holderClickListener: RestaurantClickListener,
         markClickListener: RestaurantClickListener
     ) {
+        if (Common.restaurantHolderHeight != 0) {
+            itemView.layoutParams.height = Common.restaurantHolderHeight
+            itemView.alpha = 1f
+        }
         placeName.text = restaurant.name
         tags.text = restaurant.categories
         address.text = restaurant.address
-        if (restaurant.id in favouriteIds)
-            mark.setImageResource(R.drawable.ic_favorite_24)
-        else
-            mark.setImageResource(R.drawable.ic_favorite_border_24)
+        mark.setImageResource(R.drawable.ic_favorite_24)
         imageView.load(Common.getPlaceImageAddress(restaurant.photo)) {
             crossfade(true)
             error(R.drawable.image_broken_24)
@@ -72,6 +72,7 @@ class SearchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             holderClickListener.onClick(restaurant, adapterPosition)
         }
         mark.setOnClickListener {
+            Log.d("ITEM_POSITION", adapterPosition.toString())
             markClickListener.onClick(restaurant, adapterPosition)
         }
     }

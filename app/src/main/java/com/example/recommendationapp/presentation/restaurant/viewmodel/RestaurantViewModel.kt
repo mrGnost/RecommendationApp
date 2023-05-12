@@ -35,7 +35,7 @@ class RestaurantViewModel(
     }
 
     fun setFavourite(id: Int, favourite: Boolean) {
-        disposables.add(databaseInteractor.changeFavourite(id, favourite)
+        disposables.add(databaseInteractor.setLike(id, favourite)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -46,7 +46,7 @@ class RestaurantViewModel(
     }
 
     fun setMark(id: Int, marked: Boolean) {
-        disposables.add(databaseInteractor.changeMarked(id, marked)
+        disposables.add(databaseInteractor.setMark(id, marked)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }

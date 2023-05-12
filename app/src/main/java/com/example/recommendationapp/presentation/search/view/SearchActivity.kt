@@ -38,6 +38,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var adapter: SearchAdapter
     private val disposables = CompositeDisposable()
 
+    private var favouriteIds = listOf<Int>()
+
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
@@ -60,7 +62,7 @@ class SearchActivity : AppCompatActivity() {
 
     private var markClickListener = object : RestaurantClickListener {
         override fun onClick(restaurantShort: RestaurantShort, position: Int) {
-            viewModel.changeLike(restaurantShort, !restaurantShort.favourite)
+            viewModel.changeLike(restaurantShort, restaurantShort.id !in favouriteIds)
             val text = binding.searchEditText.text?.trim()
             if (text != null && text.isNotBlank())
                 viewModel.search(text.toString())
@@ -104,6 +106,7 @@ class SearchActivity : AppCompatActivity() {
         viewModel.getErrorLiveData().observe(this, this::showError)
         viewModel.getProgressLiveData().observe(this, this::showProgress)
         viewModel.getResultLiveData().observe(this, this::showResults)
+        viewModel.getFavouriteIdsLiveData().observe(this, this::favouriteChanged)
     }
 
     private fun showProgress(isVisible: Boolean) {
@@ -119,6 +122,10 @@ class SearchActivity : AppCompatActivity() {
     private fun showError(throwable: Throwable) {
         Log.d(TAG, "showError() called with: throwable = $throwable")
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+    }
+
+    private fun favouriteChanged(ids: List<Int>) {
+        favouriteIds = ids
     }
 
     private fun createAdapter() {

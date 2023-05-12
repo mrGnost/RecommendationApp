@@ -18,10 +18,12 @@ class FavouriteViewModel(
 ) : ViewModel() {
     private val progressLiveData = MutableLiveData<Boolean>()
     private val errorLiveData = MutableLiveData<Throwable>()
+    private val favouriteLiveData = MutableLiveData<List<RestaurantShort>>()
+    private val markedLiveData = MutableLiveData<List<RestaurantShort>>()
     private val disposables = CompositeDisposable()
 
     fun clearLike(restaurant: RestaurantShort) {
-        disposables.add(databaseInteractor.setLike(restaurant, false)
+        disposables.add(databaseInteractor.setLike(restaurant.id, false)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -33,7 +35,7 @@ class FavouriteViewModel(
     }
 
     fun clearMark(restaurant: RestaurantShort) {
-        disposables.add(databaseInteractor.setMark(restaurant, false)
+        disposables.add(databaseInteractor.setMark(restaurant.id, false)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -41,6 +43,30 @@ class FavouriteViewModel(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe({ Log.d("FAVOURITE", "restaurant preference cleared") }, errorLiveData::setValue)
+        )
+    }
+
+    fun getFavouritesByIds(ids: List<Int>) {
+        disposables.add(databaseInteractor.getRestaurantsByIds(ids)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(favouriteLiveData::setValue, errorLiveData::setValue)
+        )
+    }
+
+    fun getMarkedByIds(ids: List<Int>) {
+        disposables.add(databaseInteractor.getRestaurantsByIds(ids)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(markedLiveData::setValue, errorLiveData::setValue)
         )
     }
 
@@ -52,8 +78,16 @@ class FavouriteViewModel(
         return progressLiveData
     }
 
-    fun getRestaurantsLiveData(favourite: Boolean): LiveData<List<RestaurantShort>> {
-        return databaseInteractor.getRestaurants(favourite)
+    fun getRestaurantIdsLiveData(favourite: Boolean): LiveData<List<Int>> {
+        return databaseInteractor.getRestaurantIds(favourite)
+    }
+
+    fun getFavouriteLiveData(): LiveData<List<RestaurantShort>> {
+        return favouriteLiveData
+    }
+
+    fun getMarkedLiveData(): LiveData<List<RestaurantShort>> {
+        return markedLiveData
     }
 
     companion object {

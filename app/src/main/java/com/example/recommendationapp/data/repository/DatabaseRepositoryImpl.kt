@@ -4,9 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.example.recommendationapp.data.datastore.db.RestaurantsDao
-import com.example.recommendationapp.data.model.FilterDataEntity
-import com.example.recommendationapp.data.model.RestaurantDataEntity
-import com.example.recommendationapp.data.model.RestaurantShortDataEntity
+import com.example.recommendationapp.data.model.*
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
@@ -17,11 +15,6 @@ import javax.inject.Inject
 
 class DatabaseRepositoryImpl
 @Inject constructor(private val restaurantsDao: RestaurantsDao) : DatabaseRepository {
-    override fun putRestaurants(restaurants: List<Restaurant>): Completable {
-        return Completable.fromRunnable {
-            restaurantsDao.putRestaurants(restaurants.map { RestaurantDataEntity.fromEntity(it) })
-        }
-    }
 
     override fun putRestaurantsShort(restaurants: List<RestaurantShort>): Completable {
         return Completable.fromRunnable {
@@ -29,49 +22,55 @@ class DatabaseRepositoryImpl
         }
     }
 
-    override fun makeRecommended(restaurants: List<RestaurantShort>): Completable {
+    override fun makeRecommended(ids: List<Int>): Completable {
         return Completable.fromRunnable {
-            restaurantsDao.updateRestaurantsShort(restaurants.map {
-                RestaurantShortDataEntity.fromEntity(it).apply { recommended = true }
+            restaurantsDao.putRecommendedIds(ids.map {
+                RecommendedID.fromEntity(it)
             })
         }
     }
 
-    override fun makeFavourite(restaurants: List<RestaurantShort>): Completable {
+    override fun makeFavourite(ids: List<Int>): Completable {
         return Completable.fromRunnable {
-            restaurantsDao.updateRestaurantsShort(restaurants.map {
-                RestaurantShortDataEntity.fromEntity(it).apply { favourite = true }
+            restaurantsDao.putFavouriteIds(ids.map {
+                FavouriteID.fromEntity(it)
             })
         }
     }
 
-    override fun setLike(restaurant: RestaurantShort, check: Boolean): Completable {
+    override fun setLike(id: Int, check: Boolean): Completable {
         return Completable.fromRunnable {
-            restaurantsDao.updateRestaurantShort(
-                RestaurantShortDataEntity.fromEntity(restaurant).apply { favourite = check }
-            )
+            if (check)
+                restaurantsDao.putFavouriteId(
+                    FavouriteID.fromEntity(id)
+                )
+            else
+                restaurantsDao.removeFavouriteId(id)
         }
     }
 
-    override fun setMark(restaurant: RestaurantShort, check: Boolean): Completable {
+    override fun setMark(id: Int, check: Boolean): Completable {
         return Completable.fromRunnable {
-            restaurantsDao.updateRestaurantShort(
-                RestaurantShortDataEntity.fromEntity(restaurant).apply { marked = check }
-            )
+            if (check)
+                restaurantsDao.putMarkedId(
+                    MarkedID.fromEntity(id)
+                )
+            else
+                restaurantsDao.removeMarkedId(id)
         }
     }
 
     override fun getInArea(
-        recommended: Boolean,
+        recommendedIds: List<Int>,
         leftLat: Double,
         leftLon: Double,
         rightLat: Double,
         rightLon: Double
     ): Single<List<RestaurantShort>> {
-        if (recommended)
+        if (recommendedIds.isNotEmpty())
             return Single.fromCallable {
                 restaurantsDao
-                    .getRecommendedInArea(leftLat, leftLon, rightLat, rightLon)
+                    .getInAreaByIds(leftLat, leftLon, rightLat, rightLon, recommendedIds)
                     .map { it.toEntity() }
             }
         return Single.fromCallable {
@@ -81,10 +80,10 @@ class DatabaseRepositoryImpl
         }
     }
 
-    override fun getRestaurants(favourite: Boolean): LiveData<List<RestaurantShort>> {
+    override fun getRestaurantIds(favourite: Boolean): LiveData<List<Int>> {
         if (favourite)
-            return restaurantsDao.getFavouriteRestaurants().map { x -> x.map { it.toEntity() } }
-        return restaurantsDao.getMarkedRestaurants().map { x -> x.map { it.toEntity() } }
+            return restaurantsDao.getFavouriteIds().map { x -> x.map { it.toEntity() } }
+        return restaurantsDao.getMarkedIds().map { x -> x.map { it.toEntity() } }
     }
 
     override fun getRestaurantsByIds(ids: List<Int>): Single<List<RestaurantShort>> {
@@ -136,18 +135,6 @@ class DatabaseRepositoryImpl
     override fun getFiltersCount(): LiveData<Int> {
         return restaurantsDao.getFilters().map {x ->
             x.sumOf { y -> y.checked.count { it } }
-        }
-    }
-
-    override fun changeFavourite(id: Int, favourite: Boolean): Completable {
-        return Completable.fromRunnable {
-            restaurantsDao.changeFavouriteById(id, if (favourite) 1 else 0)
-        }
-    }
-
-    override fun changeMark(id: Int, marked: Boolean): Completable {
-        return Completable.fromRunnable {
-            restaurantsDao.changeMarkById(id, if (marked) 1 else 0)
         }
     }
 }

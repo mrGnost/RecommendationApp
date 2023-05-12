@@ -12,7 +12,6 @@ import com.example.recommendationapp.domain.model.Social
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
-@Entity(tableName = DatabaseScheme.RestaurantsTableScheme.FULL_INFO_TABLE_NAME)
 @Parcelize
 @TypeConverters(Converters::class)
 data class RestaurantDataEntity(

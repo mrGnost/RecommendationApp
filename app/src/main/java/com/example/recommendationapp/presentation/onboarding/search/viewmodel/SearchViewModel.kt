@@ -1,4 +1,4 @@
-package com.example.recommendationapp.presentation.search.viewmodel
+package com.example.recommendationapp.presentation.onboarding.search.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -18,11 +18,10 @@ class SearchViewModel(
 ) : ViewModel() {
     private val progressLiveData = MutableLiveData<Boolean>()
     private val errorLiveData = MutableLiveData<Throwable>()
-    private val resultLiveData = MutableLiveData<List<RestaurantShort>>()
     private val disposables = CompositeDisposable()
 
-    fun changeLike(restaurant: RestaurantShort, value: Boolean) {
-        disposables.add(databaseInteractor.setLike(restaurant.id, value)
+    fun clearLike(restaurant: RestaurantShort) {
+        disposables.add(databaseInteractor.setLike(restaurant, false)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -33,14 +32,6 @@ class SearchViewModel(
         )
     }
 
-    fun search(prefix: String) {
-        disposables.add(databaseInteractor.findRestaurants(prefix)
-            .observeOn(schedulers.io()).subscribeOn(schedulers.io())
-            .doOnSubscribe { progressLiveData.postValue(true) }
-            .doAfterTerminate { progressLiveData.postValue(false) }
-            .subscribe(resultLiveData::postValue, errorLiveData::postValue))
-    }
-
     fun getErrorLiveData(): LiveData<Throwable> {
         return errorLiveData
     }
@@ -49,16 +40,7 @@ class SearchViewModel(
         return progressLiveData
     }
 
-    fun getResultLiveData(): LiveData<List<RestaurantShort>> {
-        return resultLiveData
-    }
-
-    fun getFavouriteIdsLiveData(): LiveData<List<Int>> {
-        return databaseInteractor.getRestaurantIds(true)
-    }
-
-    companion object {
-        private const val RETROFIT = "RETROFIT"
-        private const val DB = "DATABASE_CUSTOM"
+    fun getRestaurantsLiveData(): LiveData<List<RestaurantShort>> {
+        return databaseInteractor.getRestaurants(true)
     }
 }

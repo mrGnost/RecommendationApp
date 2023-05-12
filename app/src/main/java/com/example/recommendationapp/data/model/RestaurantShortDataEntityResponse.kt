@@ -19,7 +19,7 @@ class RestaurantShortDataEntityResponse(
     constructor() : this(0, "", 0, "", LocationDataEntity(), "")
 
     fun toEntity() = RestaurantShort(id, name, photo, address,
-        location.toEntity(), categories, favourite = false, recommended = false, marked = false
+        location.toEntity(), categories
     )
 
     companion object {

@@ -90,7 +90,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/login_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="20dp"
@@ -105,7 +105,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/enter_btn"
+            android:id="@+id/login_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/sign_in_btn"
@@ -119,10 +119,10 @@
         android:layout_height="0dp"
         android:layout_margin="20dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintBottom_toTopOf="@+id/next_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintTop_toBottomOf="@+id/login_section"
         android:visibility="gone">
 
         <TextView
@@ -140,7 +140,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/next_button"
         style="@style/Widget.RecommendationApp.CancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
