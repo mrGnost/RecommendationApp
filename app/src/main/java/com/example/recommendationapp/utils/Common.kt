@@ -11,6 +11,12 @@ object Common {
     const val LOCATION_PERMISSION_REQUEST_CODE = 612
     const val LOCATION_PERMISSION_RATIONALE_CODE = 413
 
+    const val PREFERENCE_NAME = "RECOMMENDATION_PREF"
+
+    const val PREF_ACCOUNT_NAME = "PREF_ACCOUNT_NAME"
+    const val PREF_ACCOUNT_PASSWORD = "PREF_ACCOUNT_PASSWORD"
+    const val PREF_ONBOARDING_VIEWED = "PREF_ONBOARDING_VIEWED"
+
     var restaurantHolderHeight = 0
 
     fun getPlaceImageAddress(id: Int) = "http://elesinsv.fvds.ru:8080/assets/cafes/$id.jpg"

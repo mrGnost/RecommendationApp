@@ -4,11 +4,15 @@ import androidx.room.RoomDatabase
 import com.example.recommendationapp.data.datastore.db.RoomRestaurantsDatabase
 import com.example.recommendationapp.data.filter.FilterSource
 import com.example.recommendationapp.data.filter.FilterSourceImpl
+import com.example.recommendationapp.data.local.LocalDataSource
+import com.example.recommendationapp.data.local.LocalDataSourceImpl
 import com.example.recommendationapp.data.repository.DatabaseRepositoryImpl
 import com.example.recommendationapp.data.repository.FilterRepositoryImpl
+import com.example.recommendationapp.data.repository.LocalRepositoryImpl
 import com.example.recommendationapp.data.repository.RecommendationRepositoryImpl
 import com.example.recommendationapp.domain.repository.DatabaseRepository
 import com.example.recommendationapp.domain.repository.FilterRepository
+import com.example.recommendationapp.domain.repository.LocalRepository
 import com.example.recommendationapp.domain.repository.RecommendationRepository
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.example.recommendationapp.utils.scheduler.SchedulerProviderImpl
@@ -27,6 +31,9 @@ interface BindModule {
     fun bindFilterRepository(impl: FilterRepositoryImpl): FilterRepository
 
     @Binds
+    fun bindLocalRepository(impl: LocalRepositoryImpl): LocalRepository
+
+    @Binds
     fun bindRoomDatabase(impl: RoomRestaurantsDatabase): RoomDatabase
 
     @Binds
@@ -34,4 +41,7 @@ interface BindModule {
 
     @Binds
     fun bindFilterSource(impl: FilterSourceImpl): FilterSource
+
+    @Binds
+    fun bindFilterSource(impl: LocalDataSourceImpl): LocalDataSource
 }

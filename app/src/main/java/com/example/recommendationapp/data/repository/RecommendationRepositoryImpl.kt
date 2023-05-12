@@ -1,11 +1,9 @@
 package com.example.recommendationapp.data.repository
 
 import com.example.recommendationapp.data.api.RecommendationApi
+import com.example.recommendationapp.data.model.AccountDataEntity
 import com.example.recommendationapp.data.model.FilterDataEntityRequest
-import com.example.recommendationapp.domain.model.AllRestaurantsResponse
-import com.example.recommendationapp.domain.model.Filter
-import com.example.recommendationapp.domain.model.Restaurant
-import com.example.recommendationapp.domain.model.RestaurantShort
+import com.example.recommendationapp.domain.model.*
 import com.example.recommendationapp.domain.repository.RecommendationRepository
 import io.reactivex.Single
 import javax.inject.Inject
@@ -49,5 +47,13 @@ class RecommendationRepositoryImpl
             api.getFilteredPlaces(filters.map {
                 FilterDataEntityRequest.fromEntity(it)
             })
+    }
+
+    override fun login(account: Account): Single<Int> {
+        return api.login(AccountDataEntity.fromEntity(account))
+    }
+
+    override fun register(account: Account): Single<Void> {
+        return api.register(AccountDataEntity.fromEntity(account))
     }
 }

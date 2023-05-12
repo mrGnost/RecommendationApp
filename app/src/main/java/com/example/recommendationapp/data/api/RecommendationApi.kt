@@ -27,6 +27,9 @@ interface RecommendationApi {
     fun getSimilarPlaces(@Path("id") id: Int, @Path("amount") amount: Int):
             Single<List<RestaurantShortDataEntityResponse>>
 
+    @GET("cafes/search/{substring}")
+    fun search(@Path("substring") name: String): Single<List<RestaurantShortDataEntityResponse>>
+
     @POST("filtered-cafes")
     fun getFilteredPlaces(@Body filters: List<FilterDataEntityRequest>):
             Single<List<Int>>
@@ -36,4 +39,13 @@ interface RecommendationApi {
         @Path("user_id") id: Int,
         @Body filters: List<FilterDataEntityRequest>
     ): Single<List<Int>>
+
+    @POST("recommended-cafes")
+    fun getRecommendedUnauthorized(@Body places: List<Int>): Single<List<RestaurantShortDataEntityResponse>>
+
+    @POST("login")
+    fun login(@Body account: AccountDataEntity): Single<Int>
+
+    @POST("register")
+    fun register(@Body account: AccountDataEntity): Single<Void>
 }

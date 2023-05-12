@@ -1,5 +1,6 @@
 package com.example.recommendationapp.domain.interactor
 
+import com.example.recommendationapp.domain.model.Account
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
@@ -38,4 +39,8 @@ class RecommendationInteractor
         filters: List<Filter>,
         recommended: Boolean
     ) = recommendationRepository.getFilteredPlaces(userId, filters, recommended)
+
+    fun login(account: Account) = recommendationRepository.login(account)
+
+    fun register(account: Account) = recommendationRepository.register(account)
 }
