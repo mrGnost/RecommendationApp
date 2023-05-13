@@ -7,7 +7,9 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.recommendationapp.App
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.FilterInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Account
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.Location
 import com.example.recommendationapp.domain.model.RestaurantShort
@@ -20,6 +22,7 @@ class MapViewModel(
     private val recommendationInteractor: RecommendationInteractor,
     private val databaseInteractor: DatabaseInteractor,
     private val filterInteractor: FilterInteractor,
+    private val localInteractor: LocalInteractor,
     private val schedulers: SchedulerProvider
 ) : ViewModel() {
     private val progressLiveData = MutableLiveData<Boolean>()
@@ -28,9 +31,11 @@ class MapViewModel(
     private val recommendedCountLiveData = MutableLiveData<Int>()
     private val recommendedFilterLiveData = MutableLiveData<Boolean>()
     private val filteredRestaurantsLiveData = MutableLiveData<List<RestaurantShort>>()
+    private val recommendedIdsLiveData = MutableLiveData<List<Int>>()
+    private val accountLiveData = MutableLiveData<Account>()
     private val disposables = CompositeDisposable()
 
-    fun getRestaurantsInArea(recommended: Boolean, area: VisibleRegion) {
+    fun getRestaurantsInArea(recommendedIds: List<Int>, area: VisibleRegion) {
         val leftLat = minOf(area.topLeft.latitude, area.bottomLeft.latitude,
             area.bottomRight.latitude, area.topRight.latitude)
         val leftLon = minOf(area.topLeft.longitude, area.bottomLeft.longitude,
@@ -40,7 +45,7 @@ class MapViewModel(
         val rightLon = maxOf(area.topLeft.longitude, area.bottomLeft.longitude,
             area.bottomRight.longitude, area.topRight.longitude)
         disposables.add(
-            databaseInteractor.getRestaurantsInArea(recommended, leftLat, leftLon, rightLat, rightLon)
+            databaseInteractor.getRestaurantsInArea(recommendedIds, leftLat, leftLon, rightLat, rightLon)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe { progressLiveData.postValue(true) }
@@ -48,6 +53,30 @@ class MapViewModel(
                 .subscribeOn(schedulers.io())
                 .observeOn(schedulers.ui())
                 .subscribe(restaurantsLiveData::setValue, errorLiveData::setValue)
+        )
+    }
+
+    fun getRecommendedIds(userId: Int) {
+        disposables.add(recommendationInteractor.getRecommended(userId)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(recommendedIdsLiveData::setValue, errorLiveData::setValue)
+        )
+    }
+
+    fun getRecommendedIds(favourites: List<Int>) {
+        disposables.add(recommendationInteractor.getRecommendedUnauthorized(favourites)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(recommendedIdsLiveData::setValue, errorLiveData::setValue)
         )
     }
 
@@ -61,6 +90,30 @@ class MapViewModel(
                 .subscribeOn(schedulers.io())
                 .observeOn(schedulers.ui())
                 .subscribe(recommendedCountLiveData::setValue, errorLiveData::setValue)
+        )
+    }
+
+    fun putRecommendedToDb(ids: List<Int>) {
+        disposables.add(databaseInteractor.makeRecommended(ids)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({ Log.d(DB, "recommended saved to DB") }, errorLiveData::setValue)
+        )
+    }
+
+    fun getAccount() {
+        disposables.add(localInteractor.getAccount()
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(accountLiveData::setValue, errorLiveData::setValue)
         )
     }
 
@@ -170,6 +223,10 @@ class MapViewModel(
         return recommendedCountLiveData
     }
 
+    fun getRecommendedIdsLiveData(): LiveData<List<Int>> {
+        return recommendedIdsLiveData
+    }
+
     fun getFiltersLiveData(): LiveData<List<Filter>> {
         return databaseInteractor.getFilters()
     }
@@ -184,6 +241,14 @@ class MapViewModel(
 
     fun getFilteredLiveData(): LiveData<List<RestaurantShort>> {
         return filteredRestaurantsLiveData
+    }
+
+    fun getFavouriteIdsLiveData(): LiveData<List<Int>> {
+        return databaseInteractor.getRestaurantIds(true)
+    }
+
+    fun getAccountLiveData(): LiveData<Account> {
+        return accountLiveData
     }
 
     companion object {

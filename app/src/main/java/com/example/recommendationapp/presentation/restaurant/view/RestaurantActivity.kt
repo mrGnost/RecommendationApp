@@ -59,9 +59,6 @@ class RestaurantActivity : AppCompatActivity() {
                 Intent(this@RestaurantActivity, RestaurantActivity::class.java)
                     .putExtra("restaurant_id", restaurantShort.id)
                     .putExtra("restaurant_name", restaurantShort.name)
-                    .putExtra("is_favourite", restaurantShort.favourite)
-                    .putExtra("is_marked", restaurantShort.marked)
-                    .putExtra("is_recommended", restaurantShort.recommended)
             )
         }
 
@@ -76,8 +73,12 @@ class RestaurantActivity : AppCompatActivity() {
         observeLiveData()
         setSupportActionBar(binding.topAppBar)
 
-        viewModel.getRestaurantInfo(intent.getIntExtra("restaurant_id", 1))
-        viewModel.getSimilar(intent.getIntExtra("restaurant_id", 1), 10)
+        val id = intent.getIntExtra("restaurant_id", 1)
+        viewModel.checkIfRecommended(id)
+        viewModel.checkIfFavourite(id)
+        viewModel.checkIfMarked(id)
+        viewModel.getRestaurantInfo(id)
+        viewModel.getSimilar(id, 10)
 
         binding.topAppBar.setNavigationOnClickListener {
             finish()
@@ -117,6 +118,9 @@ class RestaurantActivity : AppCompatActivity() {
         viewModel.getProgressLiveData().observe(this, this::showProgress)
         viewModel.getRestaurantLiveData().observe(this, this::showResults)
         viewModel.getSimilarLiveData().observe(this, this::showSimilar)
+        viewModel.getIsRecommendedLiveData().observe(this, this::setRecommended)
+        viewModel.getIsFavouriteLiveData().observe(this, this::setFavourite)
+        viewModel.getIsMarkedLiveData().observe(this, this::setMarked)
     }
 
     private fun showProgress(isVisible: Boolean) {
@@ -124,13 +128,21 @@ class RestaurantActivity : AppCompatActivity() {
         // binding.progressbar.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
+    private fun setRecommended(value: Boolean) {
+        isRecommended = value
+    }
+
+    private fun setFavourite(value: Boolean) {
+        isFavourite = value
+    }
+
+    private fun setMarked(value: Boolean) {
+        isMarked = value
+    }
+
     private fun showResults(restaurant: Restaurant) {
         Log.d(TAG_ADD, "showResults() called with: restaurant = ${restaurant.name}")
         this.restaurant = restaurant
-
-        isMarked = intent.getBooleanExtra("is_marked", false)
-        isFavourite = intent.getBooleanExtra("is_favourite", false)
-        isRecommended = intent.getBooleanExtra("is_recommended", false)
 
         changeMarkDisplay()
         changeLikeDisplay()

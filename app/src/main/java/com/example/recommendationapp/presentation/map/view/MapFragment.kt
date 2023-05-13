@@ -25,7 +25,9 @@ import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.FragmentMapBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.FilterInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Account
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
@@ -59,6 +61,8 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private lateinit var filters: List<Filter>
     private var filtersCount = 0
     private val disposables = CompositeDisposable()
+    private var favouriteIds = listOf<Int>()
+    private var recommendedIds = listOf<Int>()
 
     private var mapPosition: Point = Point(55.75, 37.62)
     private var userPosition: Point = Point(55.75, 37.62)
@@ -73,11 +77,13 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     @Inject
     lateinit var filterInteractor: FilterInteractor
     @Inject
+    lateinit var localInteractor: LocalInteractor
+    @Inject
     lateinit var schedulers: SchedulerProvider
 
     private val viewModel: MapViewModel by viewModels {
         MapViewModelFactory(
-            recommendationInteractor, databaseInteractor, filterInteractor, schedulers)
+            recommendationInteractor, databaseInteractor, filterInteractor, localInteractor, schedulers)
     }
 
     private val clickListener = object : EmptyClickListener {
@@ -168,6 +174,27 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         viewModel.getRecommendedFilterLiveData().observe(viewLifecycleOwner, this::setRecommendedFilter)
         viewModel.getFilteredLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
         viewModel.getFiltersLiveData().observe(viewLifecycleOwner, this::setFilters)
+        viewModel.getFavouriteIdsLiveData().observe(viewLifecycleOwner, this::setFavourite)
+        viewModel.getAccountLiveData().observe(viewLifecycleOwner, this::setAccount)
+        viewModel.getRecommendedIdsLiveData().observe(viewLifecycleOwner, this::setRecommended)
+    }
+
+    private fun setFavourite(list: List<Int>) {
+        favouriteIds = list
+        viewModel.getAccount()
+    }
+
+    private fun setAccount(account: Account) {
+        if (account.email == "") {
+            viewModel.getRecommendedIds(favouriteIds)
+        } else {
+            viewModel.getRecommendedIds(1)
+        }
+    }
+
+    private fun setRecommended(list: List<Int>) {
+        recommendedIds = list
+        viewModel.putRecommendedToDb(list)
     }
 
     private fun drawRestaurants(restaurants: List<RestaurantShort>) {
@@ -235,7 +262,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private fun setRecommendedFilter(value: Boolean) {
         binding.recommendationsBtn.isChecked = value
         viewModel.getRestaurantsInArea(
-            binding.recommendationsBtn.isChecked,
+            if (binding.recommendationsBtn.isChecked) recommendedIds else listOf(),
             binding.mapview.map.visibleRegion
         )
     }
@@ -246,7 +273,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     private fun searchRestaurants() {
         viewModel.getRestaurantsInArea(
-            binding.recommendationsBtn.isChecked,
+            if (binding.recommendationsBtn.isChecked) recommendedIds else listOf(),
             binding.mapview.map.visibleRegion
         )
     }
@@ -347,9 +374,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
                     Intent(activity, RestaurantActivity::class.java)
                         .putExtra("restaurant_id", place.id)
                         .putExtra("restaurant_name", place.name)
-                        .putExtra("is_marked", place.marked)
-                        .putExtra("is_favourite", place.favourite)
-                        .putExtra("is_recommended", place.recommended)
                 )
                 return true
             }

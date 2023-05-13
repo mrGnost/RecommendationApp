@@ -21,6 +21,9 @@ class RestaurantViewModel(
     private val errorLiveData = MutableLiveData<Throwable>()
     private val restaurantLiveData = MutableLiveData<Restaurant>()
     private val similarLiveData = MutableLiveData<List<RestaurantShort>>()
+    private val isRecommendedLiveData = MutableLiveData<Boolean>()
+    private val isFavouriteLiveData = MutableLiveData<Boolean>()
+    private val isMarkedLiveData = MutableLiveData<Boolean>()
     private val disposables = CompositeDisposable()
 
     fun getRestaurantInfo(id: Int) {
@@ -67,6 +70,39 @@ class RestaurantViewModel(
             .subscribe(similarLiveData::setValue, errorLiveData::setValue))
     }
 
+    fun checkIfRecommended(id: Int) {
+        disposables.add(databaseInteractor.checkIfRecommended(id)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(isRecommendedLiveData::setValue, errorLiveData::setValue))
+    }
+
+    fun checkIfFavourite(id: Int) {
+        disposables.add(databaseInteractor.checkIfFavourite(id)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(isFavouriteLiveData::setValue, errorLiveData::setValue))
+    }
+
+    fun checkIfMarked(id: Int) {
+        disposables.add(databaseInteractor.checkIfMarked(id)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe(isMarkedLiveData::setValue, errorLiveData::setValue))
+    }
+
     fun getErrorLiveData(): LiveData<Throwable> {
         return errorLiveData
     }
@@ -81,6 +117,18 @@ class RestaurantViewModel(
 
     fun getSimilarLiveData(): LiveData<List<RestaurantShort>> {
         return similarLiveData
+    }
+
+    fun getIsRecommendedLiveData(): LiveData<Boolean> {
+        return isRecommendedLiveData
+    }
+
+    fun getIsFavouriteLiveData(): LiveData<Boolean> {
+        return isFavouriteLiveData
+    }
+
+    fun getIsMarkedLiveData(): LiveData<Boolean> {
+        return isMarkedLiveData
     }
 
     companion object {

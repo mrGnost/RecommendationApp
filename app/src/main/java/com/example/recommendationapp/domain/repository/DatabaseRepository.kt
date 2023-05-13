@@ -44,4 +44,10 @@ interface DatabaseRepository {
     fun getRecommendedCount(): Single<Int>
 
     fun getFiltersCount(): LiveData<Int>
+
+    fun checkIfRecommended(id: Int): Single<Boolean>
+
+    fun checkIfFavourite(id: Int): Single<Boolean>
+
+    fun checkIfMarked(id: Int): Single<Boolean>
 }

@@ -8,11 +8,11 @@ import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 
 class FinishViewModelFactory(
-    private val recommendationInteractor: RecommendationInteractor,
+    private val databaseInteractor: DatabaseInteractor,
     private val localInteractor: LocalInteractor,
     private val schedulerProvider: SchedulerProvider
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FinishViewModel(recommendationInteractor, localInteractor, schedulerProvider) as T
+        return FinishViewModel(databaseInteractor, localInteractor, schedulerProvider) as T
     }
 }

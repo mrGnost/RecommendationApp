@@ -137,4 +137,22 @@ class DatabaseRepositoryImpl
             x.sumOf { y -> y.checked.count { it } }
         }
     }
+
+    override fun checkIfRecommended(id: Int): Single<Boolean> {
+        return Single.fromCallable {
+            restaurantsDao.checkIfRecommended(id).isNotEmpty()
+        }
+    }
+
+    override fun checkIfFavourite(id: Int): Single<Boolean> {
+        return Single.fromCallable {
+            restaurantsDao.checkIfFavourite(id).isNotEmpty()
+        }
+    }
+
+    override fun checkIfMarked(id: Int): Single<Boolean> {
+        return Single.fromCallable {
+            restaurantsDao.checkIfMarked(id).isNotEmpty()
+        }
+    }
 }

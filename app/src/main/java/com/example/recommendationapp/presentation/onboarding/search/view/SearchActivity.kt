@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.ActivityOnboardingSearchBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Account
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.onboarding.finish.view.FinishActivity
 import com.example.recommendationapp.presentation.onboarding.LoginActivity
@@ -34,6 +36,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var adapter: SearchAdapter
 
     private var removedPosition = -1
+    private var likedIds = listOf<Int>()
 
     private var holderClickListener = object : RestaurantClickListener {
         override fun onClick(restaurantShort: RestaurantShort, position: Int) {
@@ -41,9 +44,6 @@ class SearchActivity : AppCompatActivity() {
                 Intent(this@SearchActivity, RestaurantActivity::class.java)
                     .putExtra("restaurant_id", restaurantShort.id)
                     .putExtra("restaurant_name", restaurantShort.name)
-                    .putExtra("is_favourite", restaurantShort.favourite)
-                    .putExtra("is_marked", restaurantShort.marked)
-                    .putExtra("is_recommended", restaurantShort.recommended)
             )
         }
     }
@@ -60,6 +60,8 @@ class SearchActivity : AppCompatActivity() {
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
     @Inject
+    lateinit var localInteractor: LocalInteractor
+    @Inject
     lateinit var schedulers: SchedulerProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,8 +75,7 @@ class SearchActivity : AppCompatActivity() {
         setupSearchActivityCall()
 
         binding.nextButton.setOnClickListener {
-            startActivity(Intent(this, FinishActivity::class.java))
-            finish()
+            viewModel.getAccount()
         }
         binding.loginBtn.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
@@ -94,16 +95,24 @@ class SearchActivity : AppCompatActivity() {
     private fun createViewModel() {
         viewModel = ViewModelProvider(
             this,
-            SearchViewModelFactory(recommendationInteractor, databaseInteractor, schedulers)
+            SearchViewModelFactory(recommendationInteractor, databaseInteractor, localInteractor, schedulers)
         )[SearchViewModel::class.java]
     }
 
     private fun observeLiveData() {
         viewModel.getErrorLiveData().observe(this, this::showError)
-        viewModel.getRestaurantsLiveData().observe(this, this::updateLikes)
+        viewModel.getRestaurantIdsLiveData().observe(this, this::updateLikes)
+        viewModel.getRestaurantsLiveData().observe(this, this::updateAdapter)
+        viewModel.getAccountLiveData().observe(this, this::cacheRecommendations)
+        viewModel.getRecommendationSavedLiveData().observe(this, this::goNext)
     }
 
-    private fun updateLikes(restaurants: List<RestaurantShort>) {
+    private fun updateLikes(ids: List<Int>) {
+        likedIds = ids
+        viewModel.getRestaurantsByIds(ids)
+    }
+
+    private fun updateAdapter(restaurants: List<RestaurantShort>) {
         binding.searchHeader.visibility = if (restaurants.isEmpty()) View.VISIBLE else View.GONE
         binding.loginSection.visibility = if (restaurants.isEmpty()) View.VISIBLE else View.GONE
         binding.restaurantListHolder.visibility = if (restaurants.isEmpty()) View.GONE else View.VISIBLE
@@ -113,6 +122,21 @@ class SearchActivity : AppCompatActivity() {
         else
             adapter.removeItem(restaurants, removedPosition)
         Log.d("UPDATED_LIKES", "$restaurants")
+    }
+
+    private fun cacheRecommendations(account: Account) {
+        if (account.email == "") {
+            viewModel.cacheRecommendedIds(likedIds)
+        } else {
+            viewModel.cacheRecommendedIds(1)
+        }
+    }
+
+    private fun goNext(finished: Boolean) {
+        if (finished) {
+            startActivity(Intent(this, FinishActivity::class.java))
+            finish()
+        }
     }
 
     private fun customizeButton(isNext: Boolean) {

@@ -10,7 +10,9 @@ interface RecommendationRepository {
 
     fun getFilters(): Single<List<Filter>>
 
-    fun getRecommended(userId: Int): Single<List<RestaurantShort>>
+    fun getRecommended(userId: Int): Single<List<Int>>
+
+    fun getRecommendedUnauthorized(favourites: List<Int>): Single<List<Int>>
 
     fun getFavourite(userId: Int): Single<List<RestaurantShort>>
 

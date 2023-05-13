@@ -74,6 +74,15 @@ interface RestaurantsDao {
     @Query("SELECT COUNT(id) FROM ${DatabaseScheme.RestaurantsTableScheme.RECOMMENDED_IDS}")
     fun getRecommendedCount(): Int
 
+    @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.RECOMMENDED_IDS} WHERE id = :id")
+    fun checkIfRecommended(id: Int): List<RecommendedID>
+
+    @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.FAVOURITE_IDS} WHERE id = :id")
+    fun checkIfFavourite(id: Int): List<FavouriteID>
+
+    @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.MARKED_IDS} WHERE id = :id")
+    fun checkIfMarked(id: Int): List<MarkedID>
+
     @Query("DELETE FROM ${DatabaseScheme.RestaurantsTableScheme.RECOMMENDED_IDS} WHERE id = :id")
     fun removeRecommendedId(id: Int)
 

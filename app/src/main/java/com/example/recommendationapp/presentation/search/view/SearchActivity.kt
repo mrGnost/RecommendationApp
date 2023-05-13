@@ -53,9 +53,6 @@ class SearchActivity : AppCompatActivity() {
                 Intent(this@SearchActivity, RestaurantActivity::class.java)
                     .putExtra("restaurant_id", restaurantShort.id)
                     .putExtra("restaurant_name", restaurantShort.name)
-                    .putExtra("is_favourite", restaurantShort.favourite)
-                    .putExtra("is_marked", restaurantShort.marked)
-                    .putExtra("is_recommended", restaurantShort.recommended)
             )
         }
     }
@@ -126,10 +123,11 @@ class SearchActivity : AppCompatActivity() {
 
     private fun favouriteChanged(ids: List<Int>) {
         favouriteIds = ids
+        adapter.setFavourites(ids)
     }
 
     private fun createAdapter() {
-        adapter = SearchAdapter(emptyList(), holderClickListener, markClickListener)
+        adapter = SearchAdapter(emptyList(), emptyList(), holderClickListener, markClickListener)
         binding.recycler.layoutManager = LinearLayoutManager(this)
         binding.recycler.adapter = adapter
     }

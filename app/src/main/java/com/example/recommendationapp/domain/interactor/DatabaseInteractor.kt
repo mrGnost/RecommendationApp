@@ -50,4 +50,10 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
 
     fun setFilterChecked(filter: Filter, checked: Boolean, filterId: Int) =
         databaseRepository.changeCheckedFilter(filter, checked, filterId)
+
+    fun checkIfRecommended(id: Int) = databaseRepository.checkIfRecommended(id)
+
+    fun checkIfFavourite(id: Int) = databaseRepository.checkIfFavourite(id)
+
+    fun checkIfMarked(id: Int) = databaseRepository.checkIfMarked(id)
 }
