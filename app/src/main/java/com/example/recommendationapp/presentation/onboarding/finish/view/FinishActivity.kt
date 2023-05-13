@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.ActivityOnboardingFinishBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
@@ -32,6 +33,7 @@ class FinishActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (applicationContext as App).appComp().inject(this)
         binding = ActivityOnboardingFinishBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

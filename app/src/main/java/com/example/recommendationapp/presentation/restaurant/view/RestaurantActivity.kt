@@ -44,7 +44,6 @@ class RestaurantActivity : AppCompatActivity() {
     private var isMarked = false
     private var isFavourite = false
     private var isRecommended = false
-    private val disposables = CompositeDisposable()
 
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
@@ -202,14 +201,16 @@ class RestaurantActivity : AppCompatActivity() {
     }
 
     private fun changeMark(restaurant: Restaurant) {
+        Log.d("MARK_SET", "$isMarked")
         isMarked = !isMarked
         viewModel.setMark(restaurant.id, isMarked)
         changeMarkDisplay()
     }
 
     private fun changeLike(restaurant: Restaurant) {
+        Log.d("LIKE_SET", "$isFavourite")
         isFavourite = !isFavourite
-        viewModel.setFavourite(restaurant.id, isMarked)
+        viewModel.setFavourite(restaurant.id, isFavourite)
         changeLikeDisplay()
     }
 

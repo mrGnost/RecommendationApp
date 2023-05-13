@@ -28,9 +28,8 @@ class MapViewModel(
     private val progressLiveData = MutableLiveData<Boolean>()
     private val errorLiveData = MutableLiveData<Throwable>()
     private val restaurantsLiveData = MutableLiveData<List<RestaurantShort>>()
-    private val recommendedCountLiveData = MutableLiveData<Int>()
     private val recommendedFilterLiveData = MutableLiveData<Boolean>()
-    private val filteredRestaurantsLiveData = MutableLiveData<List<RestaurantShort>>()
+    private val filteredRestaurantIdsLiveData = MutableLiveData<List<Int>>()
     private val recommendedIdsLiveData = MutableLiveData<List<Int>>()
     private val accountLiveData = MutableLiveData<Account>()
     private val disposables = CompositeDisposable()
@@ -77,19 +76,6 @@ class MapViewModel(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe(recommendedIdsLiveData::setValue, errorLiveData::setValue)
-        )
-    }
-
-    fun getRecommendedCount() {
-        disposables.add(
-            databaseInteractor.getRecommendedCount()
-                .observeOn(Schedulers.io())
-                .subscribeOn(Schedulers.io())
-                .doOnSubscribe { progressLiveData.postValue(true) }
-                .doAfterTerminate { progressLiveData.postValue(false) }
-                .subscribeOn(schedulers.io())
-                .observeOn(schedulers.ui())
-                .subscribe(recommendedCountLiveData::setValue, errorLiveData::setValue)
         )
     }
 
@@ -186,7 +172,7 @@ class MapViewModel(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
             .subscribe(
-                this::getRestaurantsByIds,
+                filteredRestaurantIdsLiveData::setValue,
                 errorLiveData::setValue
             )
         )
@@ -219,10 +205,6 @@ class MapViewModel(
         return restaurantsLiveData
     }
 
-    fun getRecommendedCountLiveData(): LiveData<Int> {
-        return recommendedCountLiveData
-    }
-
     fun getRecommendedIdsLiveData(): LiveData<List<Int>> {
         return recommendedIdsLiveData
     }
@@ -239,8 +221,8 @@ class MapViewModel(
         return recommendedFilterLiveData
     }
 
-    fun getFilteredLiveData(): LiveData<List<RestaurantShort>> {
-        return filteredRestaurantsLiveData
+    fun getFilteredLiveData(): LiveData<List<Int>> {
+        return filteredRestaurantIdsLiveData
     }
 
     fun getFavouriteIdsLiveData(): LiveData<List<Int>> {

@@ -55,7 +55,7 @@ class SplashViewModel(
         )
     }
 
-    private fun getOnboardingFinished() {
+    fun getOnboardingFinished() {
         disposables.add(localInteractor.checkOnboardingViewed()
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
@@ -67,7 +67,7 @@ class SplashViewModel(
         )
     }
 
-    private fun getAccount() {
+    fun getAccount() {
         disposables.add(localInteractor.getAccount()
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
@@ -91,8 +91,8 @@ class SplashViewModel(
         )
     }
 
-    private fun putRecommendationsToDb(restaurants: List<RestaurantShort>) {
-        disposables.add(databaseInteractor.makeRecommended(restaurants.map { it.id })
+    private fun putRecommendationsToDb(restaurantIds: List<Int>) {
+        disposables.add(databaseInteractor.makeRecommended(restaurantIds)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }

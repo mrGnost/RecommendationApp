@@ -11,7 +11,9 @@ import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.favourite.view.FavouriteFragment
 import com.example.recommendationapp.presentation.map.view.MapBottomSheet
 import com.example.recommendationapp.presentation.map.view.MapFragment
+import com.example.recommendationapp.presentation.onboarding.LoginActivity
 import com.example.recommendationapp.presentation.onboarding.WelcomeActivity
+import com.example.recommendationapp.presentation.onboarding.finish.view.FinishActivity
 import com.example.recommendationapp.presentation.restaurant.view.RestaurantActivity
 import com.example.recommendationapp.presentation.search.view.SearchActivity
 import com.example.recommendationapp.presentation.splash.view.SplashActivity
@@ -35,9 +37,9 @@ interface AppComponent {
     fun inject(activity: SearchActivity)
     fun inject(activity: RestaurantActivity)
     fun inject(activity: WelcomeActivity)
-    fun inject(activity: ActivityOnboardingSearchBinding)
-    fun inject(activity: ActivityOnboardingLoginBinding)
-    fun inject(activity: ActivityOnboardingFinishBinding)
+    fun inject(activity: com.example.recommendationapp.presentation.onboarding.search.view.SearchActivity)
+    fun inject(activity: LoginActivity)
+    fun inject(activity: FinishActivity)
     fun inject(fragment: MapFragment)
     fun inject(fragment: MapBottomSheet)
     fun inject(fragment: FavouriteFragment)

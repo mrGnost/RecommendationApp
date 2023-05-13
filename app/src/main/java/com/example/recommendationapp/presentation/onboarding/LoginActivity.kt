@@ -2,6 +2,7 @@ package com.example.recommendationapp.presentation.onboarding
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.ActivityOnboardingLoginBinding
 import com.example.recommendationapp.presentation.auth.view.LoginFragment
@@ -11,6 +12,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (applicationContext as App).appComp().inject(this)
         binding = ActivityOnboardingLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportFragmentManager

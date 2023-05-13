@@ -14,6 +14,7 @@ import com.example.recommendationapp.App
 import com.example.recommendationapp.databinding.BottomSheetMapBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.FilterInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.presentation.map.adapter.FiltersAdapter
@@ -46,11 +47,13 @@ class MapBottomSheet(private val clickListener: EmptyClickListener) : BottomShee
     @Inject
     lateinit var filterInteractor: FilterInteractor
     @Inject
+    lateinit var localInteractor: LocalInteractor
+    @Inject
     lateinit var schedulers: SchedulerProvider
 
     private val viewModel: MapViewModel by viewModels {
         MapViewModelFactory(
-            recommendationInteractor, databaseInteractor, filterInteractor, schedulers)
+            recommendationInteractor, databaseInteractor, filterInteractor, localInteractor, schedulers)
     }
 
     private val chipClickListener = object : FilterClickListener {

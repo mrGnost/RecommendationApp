@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.ActivityOnboardingSearchBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
@@ -66,6 +67,7 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (applicationContext as App).appComp().inject(this)
         binding = ActivityOnboardingSearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

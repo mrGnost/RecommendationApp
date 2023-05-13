@@ -26,6 +26,7 @@ class LocalDataSourceImpl(val context: Context) : LocalDataSource {
 
     override fun setOnboardingViewed() {
         editor.putBoolean(PREF_ONBOARDING_VIEWED, true)
+        editor.commit()
     }
 
     override fun checkOnboardingViewed(): Boolean = pref.getBoolean(PREF_ONBOARDING_VIEWED, false)

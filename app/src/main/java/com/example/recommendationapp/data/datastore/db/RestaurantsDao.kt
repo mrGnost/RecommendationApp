@@ -55,7 +55,7 @@ interface RestaurantsDao {
     @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.SHORT_INFO_TABLE_NAME} " +
             "WHERE id IN (:ids) AND (latitude BETWEEN :leftLat AND :rightLat) " +
         "AND (longitude BETWEEN :leftLon AND :rightLon)")
-    fun getInAreaByIds(leftLat: Double, leftLon: Double, rightLat: Double, rightLon: Double, id: List<Int>):
+    fun getInAreaByIds(leftLat: Double, leftLon: Double, rightLat: Double, rightLon: Double, ids: List<Int>):
             List<RestaurantShortDataEntity>
 
     @Query("SELECT * FROM ${DatabaseScheme.RestaurantsTableScheme.FAVOURITE_IDS}")

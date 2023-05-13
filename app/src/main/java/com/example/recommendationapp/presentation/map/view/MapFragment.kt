@@ -59,10 +59,11 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private lateinit var bottomSheet: MapBottomSheet
     private lateinit var locationManager: LocationManager
     private lateinit var filters: List<Filter>
+
     private var filtersCount = 0
-    private val disposables = CompositeDisposable()
     private var favouriteIds = listOf<Int>()
-    private var recommendedIds = listOf<Int>()
+    private var recommendedIds: List<Int>? = null
+    private var filteredIds: List<Int>? = null
 
     private var mapPosition: Point = Point(55.75, 37.62)
     private var userPosition: Point = Point(55.75, 37.62)
@@ -89,7 +90,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private val clickListener = object : EmptyClickListener {
         override fun onClick() {
             viewModel.getRecommendedFilter()
-            viewModel.getFiltersLiveData()
             searchRestaurants()
         }
     }
@@ -132,7 +132,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
         binding.mapview.map.addCameraListener(this)
         mapObjects = binding.mapview.map.mapObjects
-        viewModel.getRecommendedCount()
         viewModel.getFiltersLiveData()
     }
 
@@ -169,10 +168,9 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private fun observeLiveData() {
         viewModel.getRestaurantsLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
-        viewModel.getRecommendedCountLiveData().observe(viewLifecycleOwner, this::displayRecommendedCount)
         viewModel.getFiltersCountLiveData().observe(viewLifecycleOwner, this::displayFiltersCount)
         viewModel.getRecommendedFilterLiveData().observe(viewLifecycleOwner, this::setRecommendedFilter)
-        viewModel.getFilteredLiveData().observe(viewLifecycleOwner, this::drawRestaurants)
+        viewModel.getFilteredLiveData().observe(viewLifecycleOwner, this::setFiltered)
         viewModel.getFiltersLiveData().observe(viewLifecycleOwner, this::setFilters)
         viewModel.getFavouriteIdsLiveData().observe(viewLifecycleOwner, this::setFavourite)
         viewModel.getAccountLiveData().observe(viewLifecycleOwner, this::setAccount)
@@ -194,7 +192,12 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     private fun setRecommended(list: List<Int>) {
         recommendedIds = list
+        binding.recommendationsBtn.setCount(list.size)
         viewModel.putRecommendedToDb(list)
+    }
+
+    private fun setFiltered(restaurantIds: List<Int>) {
+        filteredIds = restaurantIds
     }
 
     private fun drawRestaurants(restaurants: List<RestaurantShort>) {
@@ -250,10 +253,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
     }
 
-    private fun displayRecommendedCount(count: Int) {
-        binding.recommendationsBtn.setCount(count)
-    }
-
     private fun displayFiltersCount(count: Int) {
         binding.filtersBtn.setCount(count)
         filtersCount = count
@@ -261,10 +260,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     private fun setRecommendedFilter(value: Boolean) {
         binding.recommendationsBtn.isChecked = value
-        viewModel.getRestaurantsInArea(
-            if (binding.recommendationsBtn.isChecked) recommendedIds else listOf(),
-            binding.mapview.map.visibleRegion
-        )
+        searchRestaurants()
     }
 
     private fun setFilters(filters: List<Filter>) {
@@ -272,10 +268,13 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     }
 
     private fun searchRestaurants() {
-        viewModel.getRestaurantsInArea(
-            if (binding.recommendationsBtn.isChecked) recommendedIds else listOf(),
-            binding.mapview.map.visibleRegion
-        )
+        Log.d("RECOMMENDED", "$recommendedIds")
+        if (recommendedIds != null) {
+            viewModel.getRestaurantsInArea(
+                if (binding.recommendationsBtn.isChecked) recommendedIds!! else listOf(),
+                binding.mapview.map.visibleRegion
+            )
+        }
     }
 
     private fun setupBottomSheetCall() {
@@ -392,8 +391,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     override fun onDestroy() {
         super.onDestroy()
-        disposables.dispose()
-        disposables.clear()
         locationManager.removeUpdates(this)
     }
 

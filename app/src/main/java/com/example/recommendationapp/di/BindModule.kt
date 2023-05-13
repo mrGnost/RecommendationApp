@@ -43,5 +43,5 @@ interface BindModule {
     fun bindFilterSource(impl: FilterSourceImpl): FilterSource
 
     @Binds
-    fun bindFilterSource(impl: LocalDataSourceImpl): LocalDataSource
+    fun bindLocalSource(impl: LocalDataSourceImpl): LocalDataSource
 }

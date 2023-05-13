@@ -14,7 +14,7 @@ import com.example.recommendationapp.presentation.map.view.MapFragment
 import com.example.recommendationapp.utils.Common.LOCATION_PERMISSION_REQUEST_CODE
 import com.yandex.mapkit.MapKitFactory
 
-class LauncherActivity : AppCompatActivity() {
+class   LauncherActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {

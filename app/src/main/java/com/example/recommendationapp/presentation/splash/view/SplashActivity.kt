@@ -81,7 +81,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun onboardingChecked(finished: Boolean) {
         if (finished) {
-            viewModel.getAccountLiveData()
+            viewModel.getAccount()
         } else {
             startActivity(Intent(this, WelcomeActivity::class.java))
             finish()
@@ -114,7 +114,7 @@ class SplashActivity : AppCompatActivity() {
     private fun filtersSet(isComplete: Boolean) {
         Log.d(TAG_ADD, "filters loaded: $isComplete")
         if (isComplete) {
-            viewModel.getOnboardingFinishedLiveData()
+            viewModel.getOnboardingFinished()
         }
     }
 
