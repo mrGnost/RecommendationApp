@@ -62,7 +62,7 @@
             android:layout_marginHorizontal="20dp"
             android:layout_marginVertical="28dp"
             android:textSize="20sp"
-            style="@style/Widget.RecommendationApp.Button"
+            style="@style/Widget.RecommendationApp.SquareButton"
             android:text="@string/enter"/>
         <TextView
             android:layout_width="wrap_content"

@@ -25,6 +25,7 @@ import javax.inject.Singleton
         RetrofitModule::class,
         RoomModule::class,
         FilterModule::class,
+        LocalModule::class,
         BindModule::class
     ]
 )
