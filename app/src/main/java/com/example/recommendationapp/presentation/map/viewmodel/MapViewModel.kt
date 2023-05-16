@@ -178,20 +178,20 @@ class MapViewModel(
         )
     }
 
-    private fun getRestaurantsByIds(ids: List<Int>) {
-        disposables.add(databaseInteractor.getRestaurantsByIds(ids)
-            .observeOn(Schedulers.io())
-            .subscribeOn(Schedulers.io())
-            .doOnSubscribe { progressLiveData.postValue(true) }
-            .doAfterTerminate { progressLiveData.postValue(false) }
-            .subscribeOn(schedulers.io())
-            .observeOn(schedulers.ui())
-            .subscribe(
-                filteredRestaurantsLiveData::setValue,
-                errorLiveData::setValue
-            )
-        )
-    }
+//    private fun getRestaurantsByIds(ids: List<Int>) {
+//        disposables.add(databaseInteractor.getRestaurantsByIds(ids)
+//            .observeOn(Schedulers.io())
+//            .subscribeOn(Schedulers.io())
+//            .doOnSubscribe { progressLiveData.postValue(true) }
+//            .doAfterTerminate { progressLiveData.postValue(false) }
+//            .subscribeOn(schedulers.io())
+//            .observeOn(schedulers.ui())
+//            .subscribe(
+//                filteredRestaurantsLiveData::setValue,
+//                errorLiveData::setValue
+//            )
+//        )
+//    }
 
     fun getErrorLiveData(): LiveData<Throwable> {
         return errorLiveData

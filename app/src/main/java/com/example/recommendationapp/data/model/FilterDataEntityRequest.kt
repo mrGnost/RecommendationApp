@@ -17,7 +17,7 @@ data class FilterDataEntityRequest(
 
     companion object {
         fun fromEntity(entity: Filter): FilterDataEntityRequest = with(entity) {
-            return FilterDataEntityRequest(name, variants)
+            return FilterDataEntityRequest(name, variants.filterIndexed { index, _ -> checked[index] })
         }
     }
 }

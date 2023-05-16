@@ -16,7 +16,6 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import coil.load
 import coil.size.Scale
 import coil.transform.CircleCropTransformation
@@ -30,6 +29,8 @@ import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Account
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.RestaurantShort
+import com.example.recommendationapp.presentation.common.RestaurantPlacemarkClusterView
+import com.example.recommendationapp.presentation.common.RestaurantPlacemarkShortView
 import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModel
 import com.example.recommendationapp.presentation.map.viewmodel.MapViewModelFactory
@@ -47,15 +48,16 @@ import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
-import io.reactivex.disposables.CompositeDisposable
+import com.yandex.runtime.ui_view.ViewProvider
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.pow
 
 
-class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationListener {
+class MapFragment : Fragment(), CameraListener, MapObjectTapListener, ClusterListener, LocationListener {
     private lateinit var binding: FragmentMapBinding
     private lateinit var mapObjects: MapObjectCollection
+    private lateinit var clustersCollection: ClusterizedPlacemarkCollection
     private lateinit var bottomSheet: MapBottomSheet
     private lateinit var locationManager: LocationManager
     private lateinit var filters: List<Filter>
@@ -64,6 +66,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private var favouriteIds = listOf<Int>()
     private var recommendedIds: List<Int>? = null
     private var filteredIds: List<Int>? = null
+    private var accountEmail = ""
 
     private var mapPosition: Point = Point(55.75, 37.62)
     private var userPosition: Point = Point(55.75, 37.62)
@@ -90,7 +93,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
     private val clickListener = object : EmptyClickListener {
         override fun onClick() {
             viewModel.getRecommendedFilter()
-            searchRestaurants()
         }
     }
 
@@ -132,7 +134,6 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
         binding.mapview.map.addCameraListener(this)
         mapObjects = binding.mapview.map.mapObjects
-        viewModel.getFiltersLiveData()
     }
 
     @SuppressLint("MissingPermission")
@@ -184,7 +185,10 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     private fun setAccount(account: Account) {
         if (account.email == "") {
-            viewModel.getRecommendedIds(favouriteIds)
+            if (favouriteIds.isEmpty())
+                setRecommended(listOf())
+            else
+                viewModel.getRecommendedIds(favouriteIds)
         } else {
             viewModel.getRecommendedIds(1)
         }
@@ -198,29 +202,31 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     private fun setFiltered(restaurantIds: List<Int>) {
         filteredIds = restaurantIds
+        searchRestaurants()
     }
 
     private fun drawRestaurants(restaurants: List<RestaurantShort>) {
-        Log.d("FILTERED", restaurants.map { it.name }.toString())
+        Log.d("FINAL", restaurants.map { it.name }.toString())
         visiblePlaces = restaurants
         mapObjects.clear()
+        clustersCollection = mapObjects.addClusterizedPlacemarkCollection(this)
         for (place in restaurants) {
             if (place.id == expandedId)
                 drawShortInfo(place)
             else
                 drawName(place)
         }
+        clustersCollection.clusterPlacemarks(60.0, 15)
     }
 
     private fun drawName(place: RestaurantShort) {
-        binding.restaurantNameBubble.restaurantText.text = place.name
-        val image = createBitmapFromView(binding.restaurantNameBubble.root, 0, 0)
-        mapObjects.addPlacemark(
-            Point(place.location.latitude, place.location.longitude),
-            ImageProvider.fromBitmap(image)
-        ).apply {
-            addTapListener(this@MapFragment)
-        }
+        val location = Point(place.location.latitude, place.location.longitude)
+        val obj = clustersCollection.addPlacemark(location)
+        val view = RestaurantPlacemarkShortView(requireContext())
+        view.setText(place.name)
+        val viewProvider = ViewProvider(view)
+        obj.setView(viewProvider)
+        obj.addTapListener(this@MapFragment)
     }
 
     private fun drawShortInfo(place: RestaurantShort) {
@@ -260,20 +266,41 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
 
     private fun setRecommendedFilter(value: Boolean) {
         binding.recommendationsBtn.isChecked = value
-        searchRestaurants()
+        if (accountEmail == "") {
+            viewModel.getFilteredRestaurants(0, filters, false)
+        } else {
+            viewModel.getFilteredRestaurants(1, filters, value)
+        }
     }
 
     private fun setFilters(filters: List<Filter>) {
-        this.filters = filters
+        this.filters = filters.filter { it.checked.any { x -> x } }
+        Log.d("FILTERS", this.filters.toString())
     }
 
     private fun searchRestaurants() {
         Log.d("RECOMMENDED", "$recommendedIds")
+        Log.d("FILTERED", "$filteredIds")
         if (recommendedIds != null) {
-            viewModel.getRestaurantsInArea(
-                if (binding.recommendationsBtn.isChecked) recommendedIds!! else listOf(),
-                binding.mapview.map.visibleRegion
-            )
+            if (accountEmail != "" && !filteredIds.isNullOrEmpty()) {
+                viewModel.getRestaurantsInArea(
+                    if (binding.recommendationsBtn.isChecked) filteredIds!! else listOf(),
+                    binding.mapview.map.visibleRegion
+                )
+            } else if (filteredIds == null) {
+                viewModel.getRestaurantsInArea(
+                    if (binding.recommendationsBtn.isChecked) recommendedIds!! else listOf(),
+                    binding.mapview.map.visibleRegion
+                )
+            } else {
+                viewModel.getRestaurantsInArea(
+                    if (binding.recommendationsBtn.isChecked)
+                        recommendedIds!!.intersect(filteredIds!!.toSet()).toList()
+                    else
+                        listOf(),
+                    binding.mapview.map.visibleRegion
+                )
+            }
         }
     }
 
@@ -383,6 +410,15 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, LocationLi
         expandedId = null
         drawRestaurants(visiblePlaces)
         return true
+    }
+
+    override fun onClusterAdded(cluster: Cluster) {
+        val view = RestaurantPlacemarkClusterView(requireContext())
+        view.setText(cluster.size.toString())
+        cluster.appearance.setView(ViewProvider(view))
+        cluster.addClusterTapListener {
+            true
+        }
     }
 
     override fun onLocationChanged(location: android.location.Location) {

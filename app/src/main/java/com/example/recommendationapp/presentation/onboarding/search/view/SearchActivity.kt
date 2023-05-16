@@ -77,7 +77,10 @@ class SearchActivity : AppCompatActivity() {
         setupSearchActivityCall()
 
         binding.nextButton.setOnClickListener {
-            viewModel.getAccount()
+            if (likedIds.isNotEmpty())
+                viewModel.getAccount()
+            else
+                goNext(true)
         }
         binding.loginBtn.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
