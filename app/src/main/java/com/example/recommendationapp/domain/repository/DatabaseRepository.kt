@@ -15,6 +15,8 @@ interface DatabaseRepository {
 
     fun makeFavourite(ids: List<Int>): Completable
 
+    fun makeMarked(ids: List<Int>): Completable
+
     fun setLike(id: Int, check: Boolean): Completable
 
     fun setMark(id: Int, check: Boolean): Completable
@@ -50,4 +52,6 @@ interface DatabaseRepository {
     fun checkIfFavourite(id: Int): Single<Boolean>
 
     fun checkIfMarked(id: Int): Single<Boolean>
+
+    fun clearFavouritesAndMarked(): Completable
 }

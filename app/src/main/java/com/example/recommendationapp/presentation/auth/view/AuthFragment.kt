@@ -33,6 +33,13 @@ class AuthFragment : Fragment() {
             .beginTransaction()
             .replace(R.id.login_fragment_container, RegisterFragment.newInstance(), RegisterFragment.TAG)
             .commit()
+        childFragmentManager
+            .setFragmentResultListener("loginSuccess", this) { _, _ ->
+                childFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.login_fragment_container, AccountFragment.newInstance(), AccountFragment.TAG)
+                    .commit()
+            }
     }
 
     companion object {

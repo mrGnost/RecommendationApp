@@ -22,16 +22,20 @@ class RecommendationRepositoryImpl
         return api.getFilters().map { x -> x.map{ it.toEntity() } }
     }
 
-    override fun getRecommended(userId: Int): Single<List<Int>> {
-        return api.getRecommended(userId).map { x -> x.map { it.id } }
+    override fun getRecommended(token: String): Single<List<Int>> {
+        return api.getRecommended(token).map { x -> x.map { it.id } }
     }
 
     override fun getRecommendedUnauthorized(favourites: List<Int>): Single<List<Int>> {
         return api.getRecommendedUnauthorized(favourites).map { x -> x.map { it.id } }
     }
 
-    override fun getFavourite(userId: Int): Single<List<RestaurantShort>> {
-        return api.getFavourite(userId).map { x -> x.map { it.toEntity() } }
+    override fun getFavourite(token: String): Single<List<RestaurantShort>> {
+        return api.getFavourite(token).map { x -> x.map { it.toEntity() } }
+    }
+
+    override fun getMarked(token: String): Single<List<RestaurantShort>> {
+        return api.getMarked(token).map { x -> x.map { it.toEntity() } }
     }
 
     override fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>> {
@@ -39,12 +43,12 @@ class RecommendationRepositoryImpl
     }
 
     override fun getFilteredPlaces(
-        userId: Int,
+        token: String,
         filters: List<Filter>,
         recommended: Boolean
     ): Single<List<Int>> {
         return if (recommended)
-            api.getFilteredRecommendedPlaces(userId, filters.map {
+            api.getFilteredRecommendedPlaces(token, filters.map {
                 FilterDataEntityRequest.fromEntity(it)
             })
         else
@@ -53,7 +57,23 @@ class RecommendationRepositoryImpl
             })
     }
 
-    override fun login(account: Account): Single<Int> {
+    override fun addFavourites(token: String, cafes: List<Int>): Single<Void> {
+        return api.addFavourites(token, cafes)
+    }
+
+    override fun removeFavourites(token: String, cafes: List<Int>): Single<Void> {
+        return api.removeFavourites(token, cafes)
+    }
+
+    override fun addMarked(token: String, cafes: List<Int>): Single<Void> {
+        return api.addMarked(token, cafes)
+    }
+
+    override fun removeMarked(token: String, cafes: List<Int>): Single<Void> {
+        return api.removeMarked(token, cafes)
+    }
+
+    override fun login(account: Account): Single<String> {
         return api.login(AccountDataEntity.fromEntity(account))
     }
 

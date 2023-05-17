@@ -1,11 +1,13 @@
 package com.example.recommendationapp.data.local
 
-import com.example.recommendationapp.data.model.AccountDataEntity
+import com.example.recommendationapp.data.model.AccountLocalDataEntity
 
 interface LocalDataSource {
-    fun setAccount(account: AccountDataEntity)
+    fun setAccount(account: AccountLocalDataEntity)
 
-    fun getAccount(): AccountDataEntity
+    fun getAccount(): AccountLocalDataEntity
+
+    fun clearAccount()
 
     fun setOnboardingViewed()
 

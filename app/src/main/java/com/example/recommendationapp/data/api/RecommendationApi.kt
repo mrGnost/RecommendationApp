@@ -2,10 +2,7 @@ package com.example.recommendationapp.data.api
 
 import com.example.recommendationapp.data.model.*
 import io.reactivex.Single
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface RecommendationApi {
     @GET("cafes/{cafe_id}")
@@ -17,11 +14,14 @@ interface RecommendationApi {
     @GET("filters")
     fun getFilters(): Single<List<FilterDataEntityResponse>>
 
-    @GET("users/{user_id}/recommended-cafes")
-    fun getRecommended(@Path("user_id") id: Int): Single<List<RestaurantShortDataEntityResponse>>
+    @GET("recommended-cafes")
+    fun getRecommended(@Header("Authorization") token: String): Single<List<RestaurantShortDataEntityResponse>>
 
-    @GET("users/{user_id}/favorite-cafes")
-    fun getFavourite(@Path("user_id") id: Int): Single<List<RestaurantShortDataEntityResponse>>
+    @GET("favorite-cafes")
+    fun getFavourite(@Header("Authorization") token: String): Single<List<RestaurantShortDataEntityResponse>>
+
+    @GET("bookmarks")
+    fun getMarked(@Header("Authorization") token: String): Single<List<RestaurantShortDataEntityResponse>>
 
     @GET("cafes/{id}/similar/{amount}")
     fun getSimilarPlaces(@Path("id") id: Int, @Path("amount") amount: Int):
@@ -34,9 +34,9 @@ interface RecommendationApi {
     fun getFilteredPlaces(@Body filters: List<FilterDataEntityRequest>):
             Single<List<Int>>
 
-    @POST("users/{user_id}/recommended-cafes/filtered")
+    @POST("recommended-cafes/filtered")
     fun getFilteredRecommendedPlaces(
-        @Path("user_id") id: Int,
+        @Header("Authorization") token: String,
         @Body filters: List<FilterDataEntityRequest>
     ): Single<List<Int>>
 
@@ -44,8 +44,20 @@ interface RecommendationApi {
     fun getRecommendedUnauthorized(@Body places: List<Int>): Single<List<RestaurantShortDataEntityResponse>>
 
     @POST("login")
-    fun login(@Body account: AccountDataEntity): Single<Int>
+    fun login(@Body account: AccountDataEntity): Single<String>
 
     @POST("register")
     fun register(@Body account: AccountDataEntity): Single<Void>
+
+    @PUT("add-favourite-cafes")
+    fun addFavourites(@Header("Authorization") token: String, cafes: List<Int>): Single<Void>
+
+    @PUT("add-bookmarks")
+    fun addMarked(@Header("Authorization") token: String, cafes: List<Int>): Single<Void>
+
+    @DELETE("remove-favourite-cafes")
+    fun removeFavourites(@Header("Authorization") token: String, cafes: List<Int>): Single<Void>
+
+    @DELETE("remove-bookmarks")
+    fun removeMarked(@Header("Authorization") token: String, cafes: List<Int>): Single<Void>
 }

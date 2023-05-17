@@ -89,6 +89,12 @@ interface RestaurantsDao {
     @Query("DELETE FROM ${DatabaseScheme.RestaurantsTableScheme.RECOMMENDED_IDS}")
     fun removeAllRecommended()
 
+    @Query("DELETE FROM ${DatabaseScheme.RestaurantsTableScheme.FAVOURITE_IDS}")
+    fun removeAllFavourite()
+
+    @Query("DELETE FROM ${DatabaseScheme.RestaurantsTableScheme.MARKED_IDS}")
+    fun removeAllMarked()
+
     @Query("DELETE FROM ${DatabaseScheme.RestaurantsTableScheme.FAVOURITE_IDS} WHERE id = :id")
     fun removeFavouriteId(id: Int)
 

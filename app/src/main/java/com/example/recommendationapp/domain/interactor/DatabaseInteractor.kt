@@ -15,6 +15,9 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
     fun makeFavourite(restaurantIds: List<Int>) =
         databaseRepository.makeFavourite(restaurantIds)
 
+    fun makeMarked(restaurantIds: List<Int>) =
+        databaseRepository.makeMarked(restaurantIds)
+
     fun setLike(restaurantId: Int, value: Boolean) =
         databaseRepository.setLike(restaurantId, value)
 
@@ -56,4 +59,6 @@ class DatabaseInteractor @Inject constructor(private val databaseRepository: Dat
     fun checkIfFavourite(id: Int) = databaseRepository.checkIfFavourite(id)
 
     fun checkIfMarked(id: Int) = databaseRepository.checkIfMarked(id)
+
+    fun clearFavouritesAndMarked() = databaseRepository.clearFavouritesAndMarked()
 }

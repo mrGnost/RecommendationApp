@@ -14,7 +14,7 @@ object Common {
     const val PREFERENCE_NAME = "RECOMMENDATION_PREF"
 
     const val PREF_ACCOUNT_NAME = "PREF_ACCOUNT_NAME"
-    const val PREF_ACCOUNT_PASSWORD = "PREF_ACCOUNT_PASSWORD"
+    const val PREF_ACCOUNT_TOKEN = "PREF_ACCOUNT_TOKEN"
     const val PREF_ONBOARDING_VIEWED = "PREF_ONBOARDING_VIEWED"
 
     var restaurantHolderHeight = 0

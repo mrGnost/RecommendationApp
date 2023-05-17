@@ -22,16 +22,20 @@ class RecommendationInteractor
         return recommendationRepository.getFilters()
     }
 
-    fun getRecommended(userId: Int): Single<List<Int>> {
-        return recommendationRepository.getRecommended(userId)
+    fun getRecommended(token: String): Single<List<Int>> {
+        return recommendationRepository.getRecommended(token)
     }
 
     fun getRecommendedUnauthorized(favourites: List<Int>): Single<List<Int>> {
         return recommendationRepository.getRecommendedUnauthorized(favourites)
     }
 
-    fun getFavourite(userId: Int): Single<List<RestaurantShort>> {
-        return recommendationRepository.getFavourite(userId)
+    fun getFavourite(token: String): Single<List<RestaurantShort>> {
+        return recommendationRepository.getFavourite(token)
+    }
+
+    fun getMarked(token: String): Single<List<RestaurantShort>> {
+        return recommendationRepository.getMarked(token)
     }
 
     fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>> {
@@ -39,10 +43,26 @@ class RecommendationInteractor
     }
 
     fun getFilteredPlaces(
-        userId: Int,
+        token: String,
         filters: List<Filter>,
         recommended: Boolean
-    ) = recommendationRepository.getFilteredPlaces(userId, filters, recommended)
+    ) = recommendationRepository.getFilteredPlaces(token, filters, recommended)
+
+    fun addFavourites(token: String, cafes: List<Int>): Single<Void> {
+        return recommendationRepository.addFavourites(token, cafes)
+    }
+
+    fun removeFavourites(token: String, cafes: List<Int>): Single<Void> {
+        return recommendationRepository.removeFavourites(token, cafes)
+    }
+
+    fun addMarked(token: String, cafes: List<Int>): Single<Void> {
+        return recommendationRepository.addMarked(token, cafes)
+    }
+
+    fun removeMarked(token: String, cafes: List<Int>): Single<Void> {
+        return recommendationRepository.removeMarked(token, cafes)
+    }
 
     fun login(account: Account) = recommendationRepository.login(account)
 

@@ -9,10 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.recommendationapp.App
 import com.example.recommendationapp.R
-import com.example.recommendationapp.databinding.FragmentRegisterBinding
+import com.example.recommendationapp.databinding.FragmentAccountBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.Account
+import com.example.recommendationapp.domain.model.AccountLocal
 import com.example.recommendationapp.presentation.auth.viewmodel.AuthViewModel
 import com.example.recommendationapp.presentation.auth.viewmodel.AuthViewModelFactory
 import com.example.recommendationapp.presentation.onboarding.search.view.SearchActivity
@@ -21,9 +23,11 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
 
-class RegisterFragment : Fragment() {
-    private lateinit var binding: FragmentRegisterBinding
+class AccountFragment : Fragment() {
+    lateinit var binding: FragmentAccountBinding
     lateinit var viewModel: AuthViewModel
+
+    private var halfFinished = false
 
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
@@ -44,7 +48,7 @@ class RegisterFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        binding = FragmentAccountBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -54,18 +58,9 @@ class RegisterFragment : Fragment() {
         createViewModel()
         observeLiveData()
 
-        binding.enterBtn.setOnClickListener {
-            toLoginScreen(true)
-        }
-        binding.createBtn.setOnClickListener {
-            val password = binding.passwordEdit.text.toString().trim()
-            val passwordAgain = binding.passwordAgainEdit.text.toString().trim()
-            if (password != passwordAgain) {
-                binding.passwordAgainInput.error = "Пароли не совпадают"
-            } else {
-                binding.passwordAgainInput.error = null
-                viewModel.register(binding.inputEmail.editText.toString().trim(), password)
-            }
+        binding.exitBtn.setOnClickListener {
+            viewModel.clearCache()
+            viewModel.clearLikesAndMarks()
         }
     }
 
@@ -78,8 +73,9 @@ class RegisterFragment : Fragment() {
 
     private fun observeLiveData() {
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
-        viewModel.getSuccessLiveData().observe(viewLifecycleOwner, this::success)
-        viewModel.getRegisteredLiveData().observe(viewLifecycleOwner, this::toLoginScreen)
+        viewModel.getAccountLiveData().observe(viewLifecycleOwner, this::showAccount)
+        viewModel.getAccountClearedLiveData().observe(viewLifecycleOwner, this::dataCleared)
+        viewModel.getLikesClearedLiveData().observe(viewLifecycleOwner, this::dataCleared)
     }
 
     private fun showError(throwable: Throwable) {
@@ -87,30 +83,30 @@ class RegisterFragment : Fragment() {
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
     }
 
-    private fun success(finished: Boolean) {
-        if (finished) {
-            val result = Bundle()
-            result.putBoolean("success", true)
-            parentFragmentManager.setFragmentResult("loginSuccess", result)
+    private fun showAccount(account: AccountLocal) {
+        binding.email.text = getString(R.string.account_email, account.email)
+    }
+
+    private fun dataCleared(cleared: Boolean) {
+        if (cleared) {
+            if (halfFinished) {
+                parentFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.login_fragment_container, LoginFragment.newInstance(), LoginFragment.TAG)
+                    .commit()
+            } else
+                halfFinished = true
         }
     }
 
-    private fun toLoginScreen(finished: Boolean) {
-        if (finished)
-            parentFragmentManager
-                .beginTransaction()
-                .replace(R.id.login_fragment_container, LoginFragment.newInstance(), LoginFragment.TAG)
-                .commit()
-    }
-
     companion object {
-        const val TAG = "RegisterFragment"
+        const val TAG = "AccountFragment"
         private const val TAG_ADD = "$TAG ADD"
         private const val TAG_ERROR = "$TAG ERROR"
         private const val TAG_PROGRESS = "$TAG PROGRESS"
 
-        fun newInstance(): RegisterFragment {
-            return RegisterFragment()
+        fun newInstance(): AccountFragment {
+            return AccountFragment()
         }
     }
 }

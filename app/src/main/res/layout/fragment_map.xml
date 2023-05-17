@@ -11,18 +11,6 @@
         app:layout_constraintStart_toStartOf="@+id/mapview"
         app:layout_constraintTop_toTopOf="@+id/mapview" />
 
-    <include
-        android:id="@+id/restaurant_name_bubble"
-        layout="@layout/map_name_restaurant"
-        app:layout_constraintStart_toStartOf="@+id/mapview"
-        app:layout_constraintTop_toTopOf="@+id/mapview" />
-
-    <include
-        android:id="@+id/restaurant_cluster_bubble"
-        layout="@layout/map_cluster_restaurant"
-        app:layout_constraintStart_toStartOf="@+id/mapview"
-        app:layout_constraintTop_toTopOf="@+id/mapview"/>
-
     <com.yandex.mapkit.mapview.MapView
         android:id="@+id/mapview"
         android:layout_width="match_parent"

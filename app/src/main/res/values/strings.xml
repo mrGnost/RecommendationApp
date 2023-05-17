@@ -69,4 +69,7 @@
     <string name="finish_footer">Вы можете в любой момент редактировать список любимых мест, а рекомендации будут переподбираться автоматически</string>
     <string name="finish">Готово!</string>
     <string name="recommended_number_found">На основе списка ваших любимых мест рекомендуем %1$d кафе и ресторанов</string>
+    <string name="account_email">Вы авторизовались как %1$s</string>
+    <string name="data_synchronized_hint">Ваше избранное и рекомендации привязаны к этому аккаунту</string>
+    <string name="exit_account">Выйти</string>
 </resources>

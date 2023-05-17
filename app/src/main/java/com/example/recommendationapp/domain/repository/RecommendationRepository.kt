@@ -10,18 +10,28 @@ interface RecommendationRepository {
 
     fun getFilters(): Single<List<Filter>>
 
-    fun getRecommended(userId: Int): Single<List<Int>>
+    fun getRecommended(token: String): Single<List<Int>>
 
     fun getRecommendedUnauthorized(favourites: List<Int>): Single<List<Int>>
 
-    fun getFavourite(userId: Int): Single<List<RestaurantShort>>
+    fun getFavourite(token: String): Single<List<RestaurantShort>>
+
+    fun getMarked(token: String): Single<List<RestaurantShort>>
 
     fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>>
 
-    fun getFilteredPlaces(userId: Int, filters: List<Filter>, recommended: Boolean):
+    fun getFilteredPlaces(token: String, filters: List<Filter>, recommended: Boolean):
             Single<List<Int>>
 
-    fun login(account: Account): Single<Int>
+    fun addFavourites(token: String, cafes: List<Int>): Single<Void>
+
+    fun removeFavourites(token: String, cafes: List<Int>): Single<Void>
+
+    fun addMarked(token: String, cafes: List<Int>): Single<Void>
+
+    fun removeMarked(token: String, cafes: List<Int>): Single<Void>
+
+    fun login(account: Account): Single<String>
 
     fun register(account: Account): Single<Void>
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.recommendationapp.databinding.ActivityOnboardingFinishBinding
 import com.example.recommendationapp.databinding.ActivityOnboardingLoginBinding
 import com.example.recommendationapp.databinding.ActivityOnboardingSearchBinding
+import com.example.recommendationapp.presentation.auth.view.AccountFragment
 import com.example.recommendationapp.presentation.auth.view.AuthFragment
 import com.example.recommendationapp.presentation.auth.view.LoginFragment
 import com.example.recommendationapp.presentation.auth.view.RegisterFragment
@@ -46,6 +47,7 @@ interface AppComponent {
     fun inject(fragment: AuthFragment)
     fun inject(fragment: LoginFragment)
     fun inject(fragment: RegisterFragment)
+    fun inject(fragment: AccountFragment)
 
 
     @Component.Builder

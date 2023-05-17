@@ -38,6 +38,14 @@ class DatabaseRepositoryImpl
         }
     }
 
+    override fun makeMarked(ids: List<Int>): Completable {
+        return Completable.fromRunnable {
+            restaurantsDao.putMarkedIds(ids.map {
+                MarkedID.fromEntity(it)
+            })
+        }
+    }
+
     override fun setLike(id: Int, check: Boolean): Completable {
         return Completable.fromRunnable {
             if (check)
@@ -153,6 +161,13 @@ class DatabaseRepositoryImpl
     override fun checkIfMarked(id: Int): Single<Boolean> {
         return Single.fromCallable {
             restaurantsDao.checkIfMarked(id).isNotEmpty()
+        }
+    }
+
+    override fun clearFavouritesAndMarked(): Completable {
+        return Completable.fromRunnable {
+            restaurantsDao.removeAllFavourite()
+            restaurantsDao.removeAllMarked()
         }
     }
 }

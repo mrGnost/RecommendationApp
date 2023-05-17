@@ -10,13 +10,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.FragmentLoginBinding
+import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.presentation.auth.viewmodel.AuthViewModel
 import com.example.recommendationapp.presentation.auth.viewmodel.AuthViewModelFactory
 import com.example.recommendationapp.presentation.onboarding.search.view.SearchActivity
-import com.example.recommendationapp.presentation.onboarding.search.viewmodel.SearchViewModel
-import com.example.recommendationapp.presentation.onboarding.search.viewmodel.SearchViewModelFactory
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -26,10 +25,14 @@ class LoginFragment : Fragment() {
     lateinit var binding: FragmentLoginBinding
     lateinit var viewModel: AuthViewModel
 
+    private var halfDataSaved = false
+
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
     lateinit var localInteractor: LocalInteractor
+    @Inject
+    lateinit var databaseInteractor: DatabaseInteractor
     @Inject
     lateinit var schedulers: SchedulerProvider
 
@@ -70,13 +73,15 @@ class LoginFragment : Fragment() {
     private fun createViewModel() {
         viewModel = ViewModelProvider(
             this,
-            AuthViewModelFactory(recommendationInteractor, localInteractor, schedulers)
+            AuthViewModelFactory(recommendationInteractor, localInteractor, databaseInteractor, schedulers)
         )[AuthViewModel::class.java]
     }
 
     private fun observeLiveData() {
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
         viewModel.getSuccessLiveData().observe(viewLifecycleOwner, this::success)
+        viewModel.getLikesSavedLiveData().observe(viewLifecycleOwner, this::dataSaved)
+        viewModel.getMarksSavedLiveData().observe(viewLifecycleOwner, this::dataSaved)
     }
 
     private fun showError(throwable: Throwable) {
@@ -84,11 +89,19 @@ class LoginFragment : Fragment() {
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
     }
 
-    private fun success(finished: Boolean) {
-        if (finished) {
-            val result = Bundle()
-            result.putBoolean("success", true)
-            parentFragmentManager.setFragmentResult("loginSuccess", result)
+    private fun success(token: String) {
+        viewModel.sendLikesToAccount(token)
+        viewModel.sendMarksToAccount(token)
+    }
+
+    private fun dataSaved(saved: Boolean) {
+        if (saved) {
+            if (halfDataSaved) {
+                val result = Bundle()
+                result.putBoolean("success", true)
+                parentFragmentManager.setFragmentResult("loginSuccess", result)
+            } else
+                halfDataSaved = true
         }
     }
 
