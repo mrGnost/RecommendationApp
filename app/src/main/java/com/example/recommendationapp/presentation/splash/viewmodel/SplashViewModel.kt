@@ -7,10 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
-import com.example.recommendationapp.domain.model.Account
-import com.example.recommendationapp.domain.model.AllRestaurantsResponse
-import com.example.recommendationapp.domain.model.Filter
-import com.example.recommendationapp.domain.model.RestaurantShort
+import com.example.recommendationapp.domain.model.*
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -28,7 +25,7 @@ class SplashViewModel(
     private val favouritesCompleteLiveData = MutableLiveData<Boolean>()
     private val filtersCompleteLiveData = MutableLiveData<Boolean>()
     private val onboardingFinishedLiveData = MutableLiveData<Boolean>()
-    private val accountLiveData = MutableLiveData<Account>()
+    private val accountLiveData = MutableLiveData<AccountLocal>()
     private val disposables = CompositeDisposable()
 
     fun cacheAllRestaurants() {
@@ -79,8 +76,8 @@ class SplashViewModel(
         )
     }
 
-    fun getRecommendations(userId: Int) {
-        disposables.add(recommendationInteractor.getRecommended(userId)
+    fun getRecommendations(token: String) {
+        disposables.add(recommendationInteractor.getRecommended(token)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -103,8 +100,8 @@ class SplashViewModel(
         )
     }
 
-    fun getFavourites(userId: Int) {
-        disposables.add(recommendationInteractor.getFavourite(userId)
+    fun getFavourites(token: String) {
+        disposables.add(recommendationInteractor.getFavourite(token)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -173,7 +170,7 @@ class SplashViewModel(
         return onboardingFinishedLiveData
     }
 
-    fun getAccountLiveData(): LiveData<Account> {
+    fun getAccountLiveData(): LiveData<AccountLocal> {
         return accountLiveData
     }
 

@@ -73,8 +73,8 @@ class RecommendationRepositoryImpl
         return api.removeMarked(token, cafes)
     }
 
-    override fun login(account: Account): Single<String> {
-        return api.login(AccountDataEntity.fromEntity(account))
+    override fun login(account: Account): Single<Token> {
+        return api.login(AccountDataEntity.fromEntity(account)).map { it.toEntity() }
     }
 
     override fun register(account: Account): Single<Void> {

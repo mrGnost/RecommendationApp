@@ -64,8 +64,8 @@ class LoginFragment : Fragment() {
         }
         binding.enterBtn.setOnClickListener {
             viewModel.login(
-                binding.inputEmail.editText.toString().trim(),
-                binding.inputPassword.editText.toString().trim()
+                binding.inputEmail.editText?.text.toString().trim(),
+                binding.inputPassword.editText?.text.toString().trim()
             )
         }
     }
@@ -85,11 +85,11 @@ class LoginFragment : Fragment() {
     }
 
     private fun showError(throwable: Throwable) {
-        Log.d(SearchActivity.TAG, "showError() called with: throwable = $throwable")
-        Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+        binding.wrongCredentials.visibility = View.VISIBLE
     }
 
     private fun success(token: String) {
+        binding.wrongCredentials.visibility = View.GONE
         viewModel.sendLikesToAccount(token)
         viewModel.sendMarksToAccount(token)
     }

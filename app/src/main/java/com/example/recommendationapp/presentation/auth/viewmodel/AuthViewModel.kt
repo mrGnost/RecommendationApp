@@ -52,7 +52,7 @@ class AuthViewModel(
             .doAfterTerminate { progressLiveData.postValue(false) }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ saveAccount(AccountLocal(email, it)) }, errorLiveData::setValue)
+            .subscribe({ saveAccount(AccountLocal(email, it.token)) }, errorLiveData::setValue)
         )
     }
 

@@ -40,11 +40,11 @@ interface RecommendationApi {
         @Body filters: List<FilterDataEntityRequest>
     ): Single<List<Int>>
 
-    @POST("recommended-cafes")
+    @POST("recommended-cafes-for")
     fun getRecommendedUnauthorized(@Body places: List<Int>): Single<List<RestaurantShortDataEntityResponse>>
 
     @POST("login")
-    fun login(@Body account: AccountDataEntity): Single<String>
+    fun login(@Body account: AccountDataEntity): Single<TokenDataEntity>
 
     @POST("register")
     fun register(@Body account: AccountDataEntity): Single<Void>

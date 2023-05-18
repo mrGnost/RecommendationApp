@@ -65,6 +65,7 @@
             style="@style/Widget.RecommendationApp.SquareButton"
             android:text="@string/enter"/>
         <TextView
+            android:id="@+id/wrong_credentials"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/wrong_credentials"

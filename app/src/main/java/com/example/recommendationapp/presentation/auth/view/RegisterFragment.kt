@@ -64,7 +64,7 @@ class RegisterFragment : Fragment() {
                 binding.passwordAgainInput.error = "Пароли не совпадают"
             } else {
                 binding.passwordAgainInput.error = null
-                viewModel.register(binding.inputEmail.editText.toString().trim(), password)
+                viewModel.register(binding.inputEmail.editText?.text.toString().trim(), password)
             }
         }
     }
@@ -78,21 +78,12 @@ class RegisterFragment : Fragment() {
 
     private fun observeLiveData() {
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
-        viewModel.getSuccessLiveData().observe(viewLifecycleOwner, this::success)
         viewModel.getRegisteredLiveData().observe(viewLifecycleOwner, this::toLoginScreen)
     }
 
     private fun showError(throwable: Throwable) {
         Log.d(SearchActivity.TAG, "showError() called with: throwable = $throwable")
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
-    }
-
-    private fun success(finished: Boolean) {
-        if (finished) {
-            val result = Bundle()
-            result.putBoolean("success", true)
-            parentFragmentManager.setFragmentResult("loginSuccess", result)
-        }
     }
 
     private fun toLoginScreen(finished: Boolean) {

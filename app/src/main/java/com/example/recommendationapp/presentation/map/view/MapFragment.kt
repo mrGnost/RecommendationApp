@@ -27,6 +27,7 @@ import com.example.recommendationapp.domain.interactor.FilterInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Account
+import com.example.recommendationapp.domain.model.AccountLocal
 import com.example.recommendationapp.domain.model.Filter
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.common.RestaurantPlacemarkClusterView
@@ -66,7 +67,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, ClusterLis
     private var favouriteIds = listOf<Int>()
     private var recommendedIds: List<Int>? = null
     private var filteredIds: List<Int>? = null
-    private var accountEmail = ""
+    private var accountToken = ""
 
     private var mapPosition: Point = Point(55.75, 37.62)
     private var userPosition: Point = Point(55.75, 37.62)
@@ -183,14 +184,14 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, ClusterLis
         viewModel.getAccount()
     }
 
-    private fun setAccount(account: Account) {
+    private fun setAccount(account: AccountLocal) {
         if (account.email == "") {
             if (favouriteIds.isEmpty())
                 setRecommended(listOf())
             else
                 viewModel.getRecommendedIds(favouriteIds)
         } else {
-            viewModel.getRecommendedIds(1)
+            viewModel.getRecommendedIds(account.token)
         }
     }
 
@@ -266,10 +267,10 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, ClusterLis
 
     private fun setRecommendedFilter(value: Boolean) {
         binding.recommendationsBtn.isChecked = value
-        if (accountEmail == "") {
-            viewModel.getFilteredRestaurants(0, filters, false)
+        if (accountToken == "") {
+            viewModel.getFilteredRestaurants("", filters, false)
         } else {
-            viewModel.getFilteredRestaurants(1, filters, value)
+            viewModel.getFilteredRestaurants(accountToken, filters, value)
         }
     }
 
@@ -282,7 +283,7 @@ class MapFragment : Fragment(), CameraListener, MapObjectTapListener, ClusterLis
         Log.d("RECOMMENDED", "$recommendedIds")
         Log.d("FILTERED", "$filteredIds")
         if (recommendedIds != null) {
-            if (accountEmail != "" && !filteredIds.isNullOrEmpty()) {
+            if (accountToken != "" && !filteredIds.isNullOrEmpty()) {
                 viewModel.getRestaurantsInArea(
                     if (binding.recommendationsBtn.isChecked) filteredIds!! else listOf(),
                     binding.mapview.map.visibleRegion

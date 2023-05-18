@@ -8,6 +8,7 @@ import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Account
+import com.example.recommendationapp.domain.model.AccountLocal
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import io.reactivex.disposables.CompositeDisposable
@@ -22,7 +23,7 @@ class SearchViewModel(
     private val progressLiveData = MutableLiveData<Boolean>()
     private val errorLiveData = MutableLiveData<Throwable>()
     private val restaurantsLiveData = MutableLiveData<List<RestaurantShort>>()
-    private val accountLiveData = MutableLiveData<Account>()
+    private val accountLiveData = MutableLiveData<AccountLocal>()
     private val recommendationsSavedLiveData = MutableLiveData<Boolean>()
     private val disposables = CompositeDisposable()
 
@@ -62,8 +63,8 @@ class SearchViewModel(
         )
     }
 
-    fun cacheRecommendedIds(userId: Int) {
-        disposables.add(recommendationInteractor.getRecommended(userId)
+    fun cacheRecommendedIds(token: String) {
+        disposables.add(recommendationInteractor.getRecommended(token)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -114,7 +115,7 @@ class SearchViewModel(
         return restaurantsLiveData
     }
 
-    fun getAccountLiveData(): LiveData<Account> {
+    fun getAccountLiveData(): LiveData<AccountLocal> {
         return accountLiveData
     }
 

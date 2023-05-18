@@ -17,6 +17,7 @@ import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Account
+import com.example.recommendationapp.domain.model.AccountLocal
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.onboarding.finish.view.FinishActivity
 import com.example.recommendationapp.presentation.onboarding.LoginActivity
@@ -129,11 +130,11 @@ class SearchActivity : AppCompatActivity() {
         Log.d("UPDATED_LIKES", "$restaurants")
     }
 
-    private fun cacheRecommendations(account: Account) {
+    private fun cacheRecommendations(account: AccountLocal) {
         if (account.email == "") {
             viewModel.cacheRecommendedIds(likedIds)
         } else {
-            viewModel.cacheRecommendedIds(1)
+            viewModel.cacheRecommendedIds(account.token)
         }
     }
 

@@ -9,10 +9,7 @@ import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.FilterInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
-import com.example.recommendationapp.domain.model.Account
-import com.example.recommendationapp.domain.model.Filter
-import com.example.recommendationapp.domain.model.Location
-import com.example.recommendationapp.domain.model.RestaurantShort
+import com.example.recommendationapp.domain.model.*
 import com.example.recommendationapp.utils.scheduler.SchedulerProvider
 import com.yandex.mapkit.map.VisibleRegion
 import io.reactivex.disposables.CompositeDisposable
@@ -31,7 +28,7 @@ class MapViewModel(
     private val recommendedFilterLiveData = MutableLiveData<Boolean>()
     private val filteredRestaurantIdsLiveData = MutableLiveData<List<Int>>()
     private val recommendedIdsLiveData = MutableLiveData<List<Int>>()
-    private val accountLiveData = MutableLiveData<Account>()
+    private val accountLiveData = MutableLiveData<AccountLocal>()
     private val disposables = CompositeDisposable()
 
     fun getRestaurantsInArea(recommendedIds: List<Int>, area: VisibleRegion) {
@@ -55,8 +52,8 @@ class MapViewModel(
         )
     }
 
-    fun getRecommendedIds(userId: Int) {
-        disposables.add(recommendationInteractor.getRecommended(userId)
+    fun getRecommendedIds(token: String) {
+        disposables.add(recommendationInteractor.getRecommended(token)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -163,8 +160,8 @@ class MapViewModel(
         )
     }
 
-    fun getFilteredRestaurants(userId: Int, filters: List<Filter>, recommended: Boolean) {
-        disposables.add(recommendationInteractor.getFilteredPlaces(userId, filters, recommended)
+    fun getFilteredRestaurants(token: String, filters: List<Filter>, recommended: Boolean) {
+        disposables.add(recommendationInteractor.getFilteredPlaces(token, filters, recommended)
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
@@ -177,21 +174,6 @@ class MapViewModel(
             )
         )
     }
-
-//    private fun getRestaurantsByIds(ids: List<Int>) {
-//        disposables.add(databaseInteractor.getRestaurantsByIds(ids)
-//            .observeOn(Schedulers.io())
-//            .subscribeOn(Schedulers.io())
-//            .doOnSubscribe { progressLiveData.postValue(true) }
-//            .doAfterTerminate { progressLiveData.postValue(false) }
-//            .subscribeOn(schedulers.io())
-//            .observeOn(schedulers.ui())
-//            .subscribe(
-//                filteredRestaurantsLiveData::setValue,
-//                errorLiveData::setValue
-//            )
-//        )
-//    }
 
     fun getErrorLiveData(): LiveData<Throwable> {
         return errorLiveData
@@ -229,7 +211,7 @@ class MapViewModel(
         return databaseInteractor.getRestaurantIds(true)
     }
 
-    fun getAccountLiveData(): LiveData<Account> {
+    fun getAccountLiveData(): LiveData<AccountLocal> {
         return accountLiveData
     }
 

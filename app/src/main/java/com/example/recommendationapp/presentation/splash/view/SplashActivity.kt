@@ -12,6 +12,7 @@ import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
 import com.example.recommendationapp.domain.model.Account
+import com.example.recommendationapp.domain.model.AccountLocal
 import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
 import com.example.recommendationapp.presentation.onboarding.WelcomeActivity
 import com.example.recommendationapp.presentation.splash.viewmodel.SplashViewModel
@@ -26,6 +27,8 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
     private lateinit var viewModel: SplashViewModel
     private val disposables = CompositeDisposable()
+
+    private lateinit var account: AccountLocal
 
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
@@ -88,19 +91,20 @@ class SplashActivity : AppCompatActivity() {
         }
     }
 
-    private fun accountFound(account: Account) {
+    private fun accountFound(account: AccountLocal) {
+        this.account = account
         if (account.email == "") {
             startActivity(Intent(this, LauncherActivity::class.java))
             finish()
         } else {
-            viewModel.getRecommendations(1)
+            viewModel.getRecommendations(account.token)
         }
     }
 
     private fun recommendedSet(isComplete: Boolean) {
         Log.d(TAG_ADD, "recommended loaded: $isComplete")
         if (isComplete)
-            viewModel.getFavourites(1)
+            viewModel.getFavourites(account.token)
     }
 
     private fun favouriteSet(isComplete: Boolean) {

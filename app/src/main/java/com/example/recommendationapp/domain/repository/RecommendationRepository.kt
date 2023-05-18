@@ -31,7 +31,7 @@ interface RecommendationRepository {
 
     fun removeMarked(token: String, cafes: List<Int>): Single<Void>
 
-    fun login(account: Account): Single<String>
+    fun login(account: Account): Single<Token>
 
     fun register(account: Account): Single<Void>
 }
