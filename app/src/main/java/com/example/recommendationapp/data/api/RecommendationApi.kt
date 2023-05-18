@@ -1,6 +1,7 @@
 package com.example.recommendationapp.data.api
 
 import com.example.recommendationapp.data.model.*
+import io.reactivex.Completable
 import io.reactivex.Single
 import retrofit2.http.*
 
@@ -47,17 +48,17 @@ interface RecommendationApi {
     fun login(@Body account: AccountDataEntity): Single<TokenDataEntity>
 
     @POST("register")
-    fun register(@Body account: AccountDataEntity): Single<Void>
+    fun register(@Body account: AccountDataEntity): Completable
 
-    @PUT("add-favourite-cafes")
-    fun addFavourites(@Header("Authorization") token: String, cafes: List<Int>): Single<Void>
+    @PUT("add-favorite-cafes")
+    fun addFavourites(@Header("Authorization") token: String, @Body cafes: List<Int>): Completable
 
     @PUT("add-bookmarks")
-    fun addMarked(@Header("Authorization") token: String, cafes: List<Int>): Single<Void>
+    fun addMarked(@Header("Authorization") token: String, @Body cafes: List<Int>): Completable
 
-    @DELETE("remove-favourite-cafes")
-    fun removeFavourites(@Header("Authorization") token: String, cafes: List<Int>): Single<Void>
+    @DELETE("remove-favorite-cafes")
+    fun removeFavourites(@Header("Authorization") token: String, @Body cafes: List<Int>): Completable
 
     @DELETE("remove-bookmarks")
-    fun removeMarked(@Header("Authorization") token: String, cafes: List<Int>): Single<Void>
+    fun removeMarked(@Header("Authorization") token: String, @Body cafes: List<Int>): Completable
 }

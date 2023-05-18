@@ -58,6 +58,8 @@ class AccountFragment : Fragment() {
         createViewModel()
         observeLiveData()
 
+        viewModel.getAccount()
+
         binding.exitBtn.setOnClickListener {
             viewModel.clearCache()
             viewModel.clearLikesAndMarks()
@@ -84,10 +86,12 @@ class AccountFragment : Fragment() {
     }
 
     private fun showAccount(account: AccountLocal) {
+        Log.d("ACCOUNT", account.email)
         binding.email.text = getString(R.string.account_email, account.email)
     }
 
     private fun dataCleared(cleared: Boolean) {
+        Log.d("CLEARED", cleared.toString())
         if (cleared) {
             if (halfFinished) {
                 parentFragmentManager

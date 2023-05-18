@@ -22,4 +22,6 @@ object Common {
     fun getPlaceImageAddress(id: Int) = "http://elesinsv.fvds.ru:8080/assets/cafes/$id.jpg"
 
     fun getDishImageAddress(id: Int) = "http://elesinsv.fvds.ru:8080/assets/dishes/$id.jpg"
+
+    fun getTokenHeader(token: String) = "Bearer $token"
 }

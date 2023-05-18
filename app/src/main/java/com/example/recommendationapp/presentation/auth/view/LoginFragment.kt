@@ -91,6 +91,7 @@ class LoginFragment : Fragment() {
 
     private fun showError(throwable: Throwable) {
         binding.wrongCredentials.visibility = View.VISIBLE
+        Log.d("LOGIN", throwable.stackTraceToString())
     }
 
     private fun success(token: String) {

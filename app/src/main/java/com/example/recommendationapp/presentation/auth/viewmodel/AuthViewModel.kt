@@ -166,7 +166,7 @@ class AuthViewModel(
             .doAfterTerminate { progressLiveData.postValue(false) }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ marksSavedLiveData.postValue(true) }, errorLiveData::setValue)
+            .subscribe({ accountClearedLiveData.postValue(true) }, errorLiveData::setValue)
         )
     }
 
@@ -178,7 +178,7 @@ class AuthViewModel(
             .doAfterTerminate { progressLiveData.postValue(false) }
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.ui())
-            .subscribe({ marksSavedLiveData.postValue(true) }, errorLiveData::setValue)
+            .subscribe({ likesClearedLiveData.postValue(true) }, errorLiveData::setValue)
         )
     }
 

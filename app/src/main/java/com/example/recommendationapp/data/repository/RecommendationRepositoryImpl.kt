@@ -5,6 +5,8 @@ import com.example.recommendationapp.data.model.AccountDataEntity
 import com.example.recommendationapp.data.model.FilterDataEntityRequest
 import com.example.recommendationapp.domain.model.*
 import com.example.recommendationapp.domain.repository.RecommendationRepository
+import com.example.recommendationapp.utils.Common.getTokenHeader
+import io.reactivex.Completable
 import io.reactivex.Single
 import javax.inject.Inject
 
@@ -23,7 +25,7 @@ class RecommendationRepositoryImpl
     }
 
     override fun getRecommended(token: String): Single<List<Int>> {
-        return api.getRecommended(token).map { x -> x.map { it.id } }
+        return api.getRecommended(getTokenHeader(token)).map { x -> x.map { it.id } }
     }
 
     override fun getRecommendedUnauthorized(favourites: List<Int>): Single<List<Int>> {
@@ -31,11 +33,11 @@ class RecommendationRepositoryImpl
     }
 
     override fun getFavourite(token: String): Single<List<RestaurantShort>> {
-        return api.getFavourite(token).map { x -> x.map { it.toEntity() } }
+        return api.getFavourite(getTokenHeader(token)).map { x -> x.map { it.toEntity() } }
     }
 
     override fun getMarked(token: String): Single<List<RestaurantShort>> {
-        return api.getMarked(token).map { x -> x.map { it.toEntity() } }
+        return api.getMarked(getTokenHeader(token)).map { x -> x.map { it.toEntity() } }
     }
 
     override fun getSimilar(placeId: Int, amount: Int): Single<List<RestaurantShort>> {
@@ -48,7 +50,7 @@ class RecommendationRepositoryImpl
         recommended: Boolean
     ): Single<List<Int>> {
         return if (recommended)
-            api.getFilteredRecommendedPlaces(token, filters.map {
+            api.getFilteredRecommendedPlaces(getTokenHeader(token), filters.map {
                 FilterDataEntityRequest.fromEntity(it)
             })
         else
@@ -57,27 +59,27 @@ class RecommendationRepositoryImpl
             })
     }
 
-    override fun addFavourites(token: String, cafes: List<Int>): Single<Void> {
-        return api.addFavourites(token, cafes)
+    override fun addFavourites(token: String, cafes: List<Int>): Completable {
+        return api.addFavourites(getTokenHeader(token), cafes)
     }
 
-    override fun removeFavourites(token: String, cafes: List<Int>): Single<Void> {
-        return api.removeFavourites(token, cafes)
+    override fun removeFavourites(token: String, cafes: List<Int>): Completable {
+        return api.removeFavourites(getTokenHeader(token), cafes)
     }
 
-    override fun addMarked(token: String, cafes: List<Int>): Single<Void> {
-        return api.addMarked(token, cafes)
+    override fun addMarked(token: String, cafes: List<Int>): Completable {
+        return api.addMarked(getTokenHeader(token), cafes)
     }
 
-    override fun removeMarked(token: String, cafes: List<Int>): Single<Void> {
-        return api.removeMarked(token, cafes)
+    override fun removeMarked(token: String, cafes: List<Int>): Completable {
+        return api.removeMarked(getTokenHeader(token), cafes)
     }
 
     override fun login(account: Account): Single<Token> {
         return api.login(AccountDataEntity.fromEntity(account)).map { it.toEntity() }
     }
 
-    override fun register(account: Account): Single<Void> {
+    override fun register(account: Account): Completable {
         return api.register(AccountDataEntity.fromEntity(account))
     }
 }
