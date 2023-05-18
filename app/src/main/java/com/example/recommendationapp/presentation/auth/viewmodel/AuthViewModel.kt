@@ -80,10 +80,10 @@ class AuthViewModel(
         )
     }
 
-    fun sendLikesToAccount(token: String) {
+    fun sendLikesToAccount(token: String, likeIds: List<Int>) {
         disposables.add(recommendationInteractor.addFavourites(
             token,
-            databaseInteractor.getRestaurantIds(true).value!!
+            likeIds
         )
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
@@ -119,10 +119,10 @@ class AuthViewModel(
         )
     }
 
-    fun sendMarksToAccount(token: String) {
+    fun sendMarksToAccount(token: String, markIds: List<Int>) {
         disposables.add(recommendationInteractor.addMarked(
             token,
-            databaseInteractor.getRestaurantIds(false).value!!
+            markIds
         )
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
@@ -216,6 +216,10 @@ class AuthViewModel(
 
     fun getLikesClearedLiveData(): MutableLiveData<Boolean> {
         return likesClearedLiveData
+    }
+
+    fun getRestaurantIdsLiveData(favourite: Boolean): LiveData<List<Int>> {
+        return databaseInteractor.getRestaurantIds(favourite)
     }
 
     companion object {

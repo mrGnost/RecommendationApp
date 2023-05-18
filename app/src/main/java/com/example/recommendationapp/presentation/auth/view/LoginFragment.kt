@@ -13,6 +13,7 @@ import com.example.recommendationapp.databinding.FragmentLoginBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.auth.viewmodel.AuthViewModel
 import com.example.recommendationapp.presentation.auth.viewmodel.AuthViewModelFactory
 import com.example.recommendationapp.presentation.onboarding.search.view.SearchActivity
@@ -26,6 +27,8 @@ class LoginFragment : Fragment() {
     lateinit var viewModel: AuthViewModel
 
     private var halfDataSaved = false
+    private var favIds = listOf<Int>()
+    private var markIds = listOf<Int>()
 
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
@@ -78,6 +81,8 @@ class LoginFragment : Fragment() {
     }
 
     private fun observeLiveData() {
+        viewModel.getRestaurantIdsLiveData(true).observe(viewLifecycleOwner, this::putLikeIds)
+        viewModel.getRestaurantIdsLiveData(false).observe(viewLifecycleOwner, this::putMarkIds)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
         viewModel.getSuccessLiveData().observe(viewLifecycleOwner, this::success)
         viewModel.getLikesSavedLiveData().observe(viewLifecycleOwner, this::dataSaved)
@@ -90,8 +95,16 @@ class LoginFragment : Fragment() {
 
     private fun success(token: String) {
         binding.wrongCredentials.visibility = View.GONE
-        viewModel.sendLikesToAccount(token)
-        viewModel.sendMarksToAccount(token)
+        viewModel.sendLikesToAccount(token, favIds)
+        viewModel.sendMarksToAccount(token, markIds)
+    }
+
+    private fun putLikeIds(restaurantIds: List<Int>) {
+        favIds = restaurantIds
+    }
+
+    private fun putMarkIds(restaurantIds: List<Int>) {
+        markIds = restaurantIds
     }
 
     private fun dataSaved(saved: Boolean) {
