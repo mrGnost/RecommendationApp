@@ -27,8 +27,25 @@ class SearchViewModel(
     private val recommendationsSavedLiveData = MutableLiveData<Boolean>()
     private val disposables = CompositeDisposable()
 
-    fun clearLike(restaurant: RestaurantShort) {
+    fun clearLike(restaurant: RestaurantShort, account: AccountLocal?) {
         disposables.add(databaseInteractor.setLike(restaurant.id, false)
+            .observeOn(Schedulers.io())
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { progressLiveData.postValue(true) }
+            .doAfterTerminate { progressLiveData.postValue(false) }
+            .subscribeOn(schedulers.io())
+            .observeOn(schedulers.ui())
+            .subscribe({
+                if (account != null)
+                    clearLikeOnAccount(restaurant, account)
+                else
+                    Log.d("FAVOURITE", "restaurant preference cleared")
+            }, errorLiveData::setValue)
+        )
+    }
+
+    private fun clearLikeOnAccount(restaurant: RestaurantShort, account: AccountLocal) {
+        disposables.add(recommendationInteractor.removeFavourites(account.token, listOf(restaurant.id))
             .observeOn(Schedulers.io())
             .subscribeOn(Schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }

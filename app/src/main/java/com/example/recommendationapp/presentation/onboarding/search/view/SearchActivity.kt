@@ -39,6 +39,7 @@ class SearchActivity : AppCompatActivity() {
 
     private var removedPosition = -1
     private var likedIds = listOf<Int>()
+    private var account: AccountLocal? = null
 
     private var holderClickListener = object : RestaurantClickListener {
         override fun onClick(restaurantShort: RestaurantShort, position: Int) {
@@ -52,7 +53,7 @@ class SearchActivity : AppCompatActivity() {
 
     private var markClickListener = object : RestaurantClickListener {
         override fun onClick(restaurantShort: RestaurantShort, position: Int) {
-            viewModel.clearLike(restaurantShort)
+            viewModel.clearLike(restaurantShort, account)
             removedPosition = position
         }
     }
@@ -77,9 +78,11 @@ class SearchActivity : AppCompatActivity() {
         observeLiveData()
         setupSearchActivityCall()
 
+        viewModel.getAccount()
+
         binding.nextButton.setOnClickListener {
             if (likedIds.isNotEmpty())
-                viewModel.getAccount()
+                cacheRecommendations(account)
             else
                 goNext(true)
         }
@@ -109,7 +112,7 @@ class SearchActivity : AppCompatActivity() {
         viewModel.getErrorLiveData().observe(this, this::showError)
         viewModel.getRestaurantIdsLiveData().observe(this, this::updateLikes)
         viewModel.getRestaurantsLiveData().observe(this, this::updateAdapter)
-        viewModel.getAccountLiveData().observe(this, this::cacheRecommendations)
+        viewModel.getAccountLiveData().observe(this, this::setAccount)
         viewModel.getRecommendationSavedLiveData().observe(this, this::goNext)
     }
 
@@ -130,8 +133,13 @@ class SearchActivity : AppCompatActivity() {
         Log.d("UPDATED_LIKES", "$restaurants")
     }
 
-    private fun cacheRecommendations(account: AccountLocal) {
-        if (account.email == "") {
+    private fun setAccount(account: AccountLocal) {
+        if (account.email != "")
+            this.account = account
+    }
+
+    private fun cacheRecommendations(account: AccountLocal?) {
+        if (account == null) {
             viewModel.cacheRecommendedIds(likedIds)
         } else {
             viewModel.cacheRecommendedIds(account.token)

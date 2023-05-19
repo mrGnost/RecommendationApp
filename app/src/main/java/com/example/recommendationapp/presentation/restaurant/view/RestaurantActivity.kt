@@ -16,7 +16,9 @@ import com.example.recommendationapp.App
 import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.FragmentRestaurantBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.AccountLocal
 import com.example.recommendationapp.domain.model.Restaurant
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.launcher.view.LauncherActivity
@@ -44,11 +46,14 @@ class RestaurantActivity : AppCompatActivity() {
     private var isMarked = false
     private var isFavourite = false
     private var isRecommended = false
+    private var account: AccountLocal? = null
 
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
+    @Inject
+    lateinit var localInteractor: LocalInteractor
     @Inject
     lateinit var schedulers: SchedulerProvider
 
@@ -71,6 +76,8 @@ class RestaurantActivity : AppCompatActivity() {
         createViewModel()
         observeLiveData()
         setSupportActionBar(binding.topAppBar)
+
+        viewModel.getAccount()
 
         val id = intent.getIntExtra("restaurant_id", 1)
         viewModel.checkIfRecommended(id)
@@ -108,7 +115,10 @@ class RestaurantActivity : AppCompatActivity() {
 
     private fun createViewModel() {
         viewModel = ViewModelProvider(
-            this, RestaurantViewModelFactory(recommendationInteractor, databaseInteractor, schedulers)
+            this,
+            RestaurantViewModelFactory(
+                recommendationInteractor, databaseInteractor, localInteractor, schedulers
+            )
         )[RestaurantViewModel::class.java]
     }
 
@@ -117,6 +127,7 @@ class RestaurantActivity : AppCompatActivity() {
         viewModel.getProgressLiveData().observe(this, this::showProgress)
         viewModel.getRestaurantLiveData().observe(this, this::showResults)
         viewModel.getSimilarLiveData().observe(this, this::showSimilar)
+        viewModel.getAccountLiveData().observe(this, this::setAccount)
         viewModel.getIsRecommendedLiveData().observe(this, this::setRecommended)
         viewModel.getIsFavouriteLiveData().observe(this, this::setFavourite)
         viewModel.getIsMarkedLiveData().observe(this, this::setMarked)
@@ -125,6 +136,11 @@ class RestaurantActivity : AppCompatActivity() {
     private fun showProgress(isVisible: Boolean) {
         Log.i(TAG, "showProgress called with param = $isVisible")
         // binding.progressbar.visibility = if (isVisible) View.VISIBLE else View.GONE
+    }
+
+    private fun setAccount(account: AccountLocal) {
+        if (account.email != "")
+            this.account = account
     }
 
     private fun setRecommended(value: Boolean) {
@@ -203,14 +219,14 @@ class RestaurantActivity : AppCompatActivity() {
     private fun changeMark(restaurant: Restaurant) {
         Log.d("MARK_SET", "$isMarked")
         isMarked = !isMarked
-        viewModel.setMark(restaurant.id, isMarked)
+        viewModel.setMark(restaurant.id, isMarked, account)
         changeMarkDisplay()
     }
 
     private fun changeLike(restaurant: Restaurant) {
         Log.d("LIKE_SET", "$isFavourite")
         isFavourite = !isFavourite
-        viewModel.setFavourite(restaurant.id, isFavourite)
+        viewModel.setFavourite(restaurant.id, isFavourite, account)
         changeLikeDisplay()
     }
 

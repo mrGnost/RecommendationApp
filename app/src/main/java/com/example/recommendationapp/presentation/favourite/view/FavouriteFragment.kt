@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recommendationapp.App
 import com.example.recommendationapp.databinding.FragmentFavouriteBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.AccountLocal
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.favourite.adapter.FavouriteAdapter
 import com.example.recommendationapp.presentation.favourite.viewmodel.FavouriteViewModel
@@ -35,11 +37,14 @@ class FavouriteFragment : Fragment() {
     private val disposables = CompositeDisposable()
 
     private var removedPosition = -1
+    private var account: AccountLocal? = null
 
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
+    @Inject
+    lateinit var localInteractor: LocalInteractor
     @Inject
     lateinit var schedulers: SchedulerProvider
 
@@ -56,9 +61,9 @@ class FavouriteFragment : Fragment() {
     private var markClickListener = object : RestaurantClickListener {
         override fun onClick(restaurantShort: RestaurantShort, position: Int) {
             if (binding.favSwitch.isFavourite) {
-                viewModel.clearLike(restaurantShort)
+                viewModel.clearLike(restaurantShort, account)
             } else {
-                viewModel.clearMark(restaurantShort)
+                viewModel.clearMark(restaurantShort, account)
             }
             removedPosition = position
         }
@@ -80,6 +85,8 @@ class FavouriteFragment : Fragment() {
         createViewModel()
         observeLiveData()
 
+        viewModel.getAccount()
+
         binding.favSwitch.setOnSwitchChangeListener {
             val favourite = binding.favSwitch.isFavourite
             adapter.setData(if (favourite) favData else markData, favourite)
@@ -88,16 +95,25 @@ class FavouriteFragment : Fragment() {
 
     private fun createViewModel() {
         viewModel = ViewModelProvider(
-            this, FavouriteViewModelFactory(recommendationInteractor, databaseInteractor, schedulers)
+            this,
+            FavouriteViewModelFactory(
+                recommendationInteractor, databaseInteractor, localInteractor, schedulers
+            )
         )[FavouriteViewModel::class.java]
     }
 
     private fun observeLiveData() {
+        viewModel.getAccountLiveData().observe(viewLifecycleOwner, this::setAccount)
         viewModel.getErrorLiveData().observe(viewLifecycleOwner, this::showError)
         viewModel.getRestaurantIdsLiveData(true).observe(viewLifecycleOwner, this::putLikeIds)
         viewModel.getRestaurantIdsLiveData(false).observe(viewLifecycleOwner, this::putMarkIds)
         viewModel.getFavouriteLiveData().observe(viewLifecycleOwner, this::updateLikes)
         viewModel.getMarkedLiveData().observe(viewLifecycleOwner, this::updateMarks)
+    }
+
+    private fun setAccount(account: AccountLocal) {
+        if (account.email != "")
+            this.account = account
     }
 
     private fun putLikeIds(restaurantIds: List<Int>) {

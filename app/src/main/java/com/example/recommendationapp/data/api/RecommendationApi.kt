@@ -56,9 +56,9 @@ interface RecommendationApi {
     @PUT("add-bookmarks")
     fun addMarked(@Header("Authorization") token: String, @Body cafes: List<Int>): Completable
 
-    @DELETE("remove-favorite-cafes")
+    @HTTP(method = "DELETE", path = "remove-favorite-cafes", hasBody = true)
     fun removeFavourites(@Header("Authorization") token: String, @Body cafes: List<Int>): Completable
 
-    @DELETE("remove-bookmarks")
+    @HTTP(method = "DELETE", path = "remove-bookmarks", hasBody = true)
     fun removeMarked(@Header("Authorization") token: String, @Body cafes: List<Int>): Completable
 }

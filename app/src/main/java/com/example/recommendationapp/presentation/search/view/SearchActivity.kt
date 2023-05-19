@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.recommendationapp.App
 import com.example.recommendationapp.databinding.FragmentSearchBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
+import com.example.recommendationapp.domain.interactor.LocalInteractor
 import com.example.recommendationapp.domain.interactor.RecommendationInteractor
+import com.example.recommendationapp.domain.model.AccountLocal
 import com.example.recommendationapp.domain.model.RestaurantShort
 import com.example.recommendationapp.presentation.restaurant.view.RestaurantActivity
 import com.example.recommendationapp.presentation.search.adapter.SearchAdapter
@@ -39,11 +41,14 @@ class SearchActivity : AppCompatActivity() {
     private val disposables = CompositeDisposable()
 
     private var favouriteIds = listOf<Int>()
+    private var account: AccountLocal? = null
 
     @Inject
     lateinit var recommendationInteractor: RecommendationInteractor
     @Inject
     lateinit var databaseInteractor: DatabaseInteractor
+    @Inject
+    lateinit var localInteractor: LocalInteractor
     @Inject
     lateinit var schedulers: SchedulerProvider
 
@@ -59,7 +64,7 @@ class SearchActivity : AppCompatActivity() {
 
     private var markClickListener = object : RestaurantClickListener {
         override fun onClick(restaurantShort: RestaurantShort, position: Int) {
-            viewModel.changeLike(restaurantShort, restaurantShort.id !in favouriteIds)
+            viewModel.changeLike(restaurantShort, restaurantShort.id !in favouriteIds, account)
             val text = binding.searchEditText.text?.trim()
             if (text != null && text.isNotBlank())
                 viewModel.search(text.toString())
@@ -79,6 +84,8 @@ class SearchActivity : AppCompatActivity() {
         createViewModel()
         observeLiveData()
 
+        viewModel.getAccount()
+
         disposables.add(Observable.create { subscriber ->
             binding.searchEditText.doOnTextChanged { input, _, _, _ ->
                 subscriber.onNext(input.toString())
@@ -95,7 +102,10 @@ class SearchActivity : AppCompatActivity() {
 
     private fun createViewModel() {
         viewModel = ViewModelProvider(
-            this, SearchViewModelFactory(recommendationInteractor, databaseInteractor, schedulers)
+            this,
+            SearchViewModelFactory(
+                recommendationInteractor, databaseInteractor, localInteractor, schedulers
+            )
         )[SearchViewModel::class.java]
     }
 
@@ -104,6 +114,7 @@ class SearchActivity : AppCompatActivity() {
         viewModel.getProgressLiveData().observe(this, this::showProgress)
         viewModel.getResultLiveData().observe(this, this::showResults)
         viewModel.getFavouriteIdsLiveData().observe(this, this::favouriteChanged)
+        viewModel.getAccountLiveData().observe(this, this::setAccount)
     }
 
     private fun showProgress(isVisible: Boolean) {
@@ -124,6 +135,11 @@ class SearchActivity : AppCompatActivity() {
     private fun favouriteChanged(ids: List<Int>) {
         favouriteIds = ids
         adapter.setFavourites(ids)
+    }
+
+    private fun setAccount(account: AccountLocal) {
+        if (account.email != "")
+            this.account = account
     }
 
     private fun createAdapter() {
