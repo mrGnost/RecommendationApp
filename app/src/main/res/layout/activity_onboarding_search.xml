@@ -41,7 +41,7 @@
             android:layout_margin="40dp"
             android:text="@string/search_description"
             android:textAlignment="center"
-            android:textColor="@color/violet_700"
+            android:textColor="@color/violet_500"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

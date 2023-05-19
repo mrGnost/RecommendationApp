@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recommendationapp.App
+import com.example.recommendationapp.R
 import com.example.recommendationapp.databinding.FragmentFavouriteBinding
 import com.example.recommendationapp.domain.interactor.DatabaseInteractor
 import com.example.recommendationapp.domain.interactor.LocalInteractor
@@ -89,7 +90,9 @@ class FavouriteFragment : Fragment() {
 
         binding.favSwitch.setOnSwitchChangeListener {
             val favourite = binding.favSwitch.isFavourite
+            setEmptyMessage(favourite)
             adapter.setData(if (favourite) favData else markData, favourite)
+            showEmptyMessage(if (favourite) favData.isEmpty() else markData.isEmpty())
         }
     }
 
@@ -130,6 +133,7 @@ class FavouriteFragment : Fragment() {
                 adapter.setData(restaurants, true)
             else
                 adapter.removeItem(restaurants, removedPosition)
+            showEmptyMessage(restaurants.isEmpty())
         }
         favData = restaurants
         Log.d("UPDATED_LIKES", "$favData")
@@ -141,6 +145,7 @@ class FavouriteFragment : Fragment() {
                 adapter.setData(restaurants, false)
             else
                 adapter.removeItem(restaurants, removedPosition)
+            showEmptyMessage(restaurants.isEmpty())
         }
         markData = restaurants
         Log.d("UPDATED_MARKS", "$markData")
@@ -149,6 +154,23 @@ class FavouriteFragment : Fragment() {
     private fun showError(throwable: Throwable) {
         Log.d(SplashActivity.TAG, "showError() called with: throwable = $throwable")
         Snackbar.make(binding.root, throwable.toString(), BaseTransientBottomBar.LENGTH_SHORT).show()
+    }
+
+    private fun showEmptyMessage(isEmpty: Boolean) {
+        binding.recycler.visibility = if (isEmpty) View.GONE else View.VISIBLE
+        binding.emptyHolder.visibility = if (isEmpty) View.VISIBLE else View.GONE
+    }
+
+    private fun setEmptyMessage(favourite: Boolean) {
+        if (favourite) {
+            binding.emptyImage.setImageResource(R.drawable.ic_fav_nav_24)
+            binding.emptyMessage.text = getString(R.string.fav_empty_message)
+            binding.emptyDescription.text = getString(R.string.fav_empty_comment)
+        } else {
+            binding.emptyImage.setImageResource(R.drawable.ic_bookmark_dark_24)
+            binding.emptyMessage.text = getString(R.string.mark_empty_message)
+            binding.emptyDescription.text = getString(R.string.mark_empty_comment)
+        }
     }
 
     private fun createAdapter() {

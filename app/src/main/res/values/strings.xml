@@ -72,4 +72,8 @@
     <string name="account_email">Вы авторизовались как %1$s</string>
     <string name="data_synchronized_hint">Ваше избранное и рекомендации привязаны к этому аккаунту</string>
     <string name="exit_account">Выйти</string>
+    <string name="fav_empty_message">Тут пока пусто…</string>
+    <string name="mark_empty_message">И тут пока пусто…</string>
+    <string name="fav_empty_comment">Добавляйте заведения в любимые места, чтобы мы могли рекомендовать похожие</string>
+    <string name="mark_empty_comment">Добавляйте заведения в список мест, которые хотите посетить</string>
 </resources>

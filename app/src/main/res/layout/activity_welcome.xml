@@ -20,7 +20,7 @@
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_margin="15dp"
-            android:src="@drawable/ic_favorite_grey_24"
+            android:src="@drawable/ic_fav_nav_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
