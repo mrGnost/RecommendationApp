@@ -68,4 +68,6 @@ class RecommendationInteractor
     fun login(account: Account) = recommendationRepository.login(account)
 
     fun register(account: Account) = recommendationRepository.register(account)
+
+    fun search(substring: String) = recommendationRepository.search(substring)
 }

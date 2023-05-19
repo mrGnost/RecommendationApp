@@ -82,4 +82,8 @@ class RecommendationRepositoryImpl
     override fun register(account: Account): Completable {
         return api.register(AccountDataEntity.fromEntity(account))
     }
+
+    override fun search(substring: String): Single<List<RestaurantShort>> {
+        return api.search(substring).map { it.map { x -> x.toEntity() } }
+    }
 }

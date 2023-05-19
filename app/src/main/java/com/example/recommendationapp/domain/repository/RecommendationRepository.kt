@@ -35,4 +35,6 @@ interface RecommendationRepository {
     fun login(account: Account): Single<Token>
 
     fun register(account: Account): Completable
+
+    fun search(substring: String): Single<List<RestaurantShort>>
 }

@@ -66,7 +66,7 @@ class SearchViewModel(
     }
 
     fun search(prefix: String) {
-        disposables.add(databaseInteractor.findRestaurants(prefix)
+        disposables.add(recommendationInteractor.search(prefix)
             .observeOn(schedulers.io()).subscribeOn(schedulers.io())
             .doOnSubscribe { progressLiveData.postValue(true) }
             .doAfterTerminate { progressLiveData.postValue(false) }
